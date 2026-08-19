@@ -12,6 +12,7 @@ import {
   readApplications,
   saveApplication,
 } from "@/lib/applications";
+import { readStartups, startupFromApplication, writeStartups } from "@/lib/startups";
 
 const usersStorageKey = "lidea-admin-users";
 
@@ -74,6 +75,13 @@ export default function ApplicationDetailPage() {
       ],
     };
     persist(nextApplication, "Durum güncellendi.");
+    if (nextStatus === "Kabul") {
+      const startups = readStartups();
+      const exists = startups.some((startup) => startup.applicationId === application.id);
+      if (!exists) {
+        writeStartups([startupFromApplication(nextApplication), ...startups]);
+      }
+    }
     addAdminActivity("Başvuru durumu değişti", `${application.startup}: ${oldStatus} → ${nextStatus}`);
   }
 

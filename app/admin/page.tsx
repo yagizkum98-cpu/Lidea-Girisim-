@@ -482,6 +482,10 @@ export default function AdminPage() {
                 window.location.href = "/admin/basvurular";
                 return;
               }
+              if (item === "Girişimler") {
+                window.location.href = "/admin/girisimler";
+                return;
+              }
               if (item === "Program") {
                 window.location.href = "/admin/program";
                 return;
