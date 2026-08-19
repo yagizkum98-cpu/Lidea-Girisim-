@@ -46,10 +46,17 @@ type Announcement = {
   createdAt: string;
 };
 
-const storageKey = "lidea-admin-users";
+type Activity = {
+  time: string;
+  title: string;
+  detail: string;
+};
+
+const usersStorageKey = "lidea-admin-users";
 const sessionKey = "lidea-admin-session";
 const announcementsStorageKey = "lidea-announcements";
 const applicationsStorageKey = "lidea-applications";
+const activitiesStorageKey = "lidea-admin-activities";
 
 const initialUsers: AdminUser[] = [
   {
@@ -62,21 +69,13 @@ const initialUsers: AdminUser[] = [
 
 const menu = [
   "Dashboard",
-  "Program Yönetimi",
   "Başvurular",
   "Girişimler",
-  "Girişimciler",
-  "Değerlendiriciler",
-  "Mentorlar",
-  "Eğitimler",
-  "Etkinlikler",
-  "Görevler",
-  "Demo Day",
-  "Dokümanlar",
+  "Jüri",
+  "Program",
   "Bildirimler",
   "Raporlar",
-  "Landing Page Yönetimi",
-  "Sistem Ayarları",
+  "Ayarlar",
 ];
 
 const statuses: ApplicationStatus[] = [
@@ -88,97 +87,14 @@ const statuses: ApplicationStatus[] = [
   "Reddedildi",
 ];
 
-const applicationsSeed: Application[] = [
-  {
-    id: "LID-0301",
-    founder: "Deniz Aral",
-    email: "deniz@orbit.ai",
-    startup: "Orbit AI",
-    period: "3. Dönem",
-    sector: "Yapay Zeka",
-    city: "Muğla",
-    stage: "MVP",
-    teamSize: 4,
-    score: 88,
-    status: "Jüriye Gönderildi",
-    submittedAt: "2026-08-12",
-  },
-  {
-    id: "LID-0302",
-    founder: "Elif Kaya",
-    email: "elif@agrolink.com",
-    startup: "AgroLink",
-    period: "3. Dönem",
-    sector: "Tarım Teknolojileri",
-    city: "İzmir",
-    stage: "Prototip",
-    teamSize: 3,
-    score: 79,
-    status: "İnceleniyor",
-    submittedAt: "2026-08-10",
-  },
-  {
-    id: "LID-0303",
-    founder: "Mert Yılmaz",
-    email: "mert@edupulse.io",
-    startup: "EduPulse",
-    period: "3. Dönem",
-    sector: "Eğitim",
-    city: "İstanbul",
-    stage: "İlk müşteriler",
-    teamSize: 5,
-    score: 92,
-    status: "Kabul",
-    submittedAt: "2026-08-08",
-  },
-  {
-    id: "LID-0304",
-    founder: "Sena Demir",
-    email: "sena@mobilite.co",
-    startup: "MobiLite",
-    period: "2. Dönem",
-    sector: "Mobilite",
-    city: "Ankara",
-    stage: "Fikir",
-    teamSize: 2,
-    score: 64,
-    status: "Yedek",
-    submittedAt: "2026-07-28",
-  },
-  {
-    id: "LID-0305",
-    founder: "Baran Ece",
-    email: "baran@healthmap.app",
-    startup: "HealthMap",
-    period: "3. Dönem",
-    sector: "Sağlık",
-    city: "Antalya",
-    stage: "MVP",
-    teamSize: 6,
-    score: 83,
-    status: "Yeni",
-    submittedAt: "2026-08-15",
-  },
-  {
-    id: "LID-0306",
-    founder: "Zeynep Acar",
-    email: "zeynep@finbridge.co",
-    startup: "FinBridge",
-    period: "1. Dönem",
-    sector: "Finans",
-    city: "Bursa",
-    stage: "Gelir elde ediyor",
-    teamSize: 7,
-    score: 55,
-    status: "Reddedildi",
-    submittedAt: "2026-06-21",
-  },
-];
-
-const kpis = [
-  ["24", "Aktif Mentor"],
-  ["18", "Eğitim"],
-];
+const legacyDemoIds = new Set([
+  "LID-0301",
+  "LID-0302",
+  "LID-0303",
+  "LID-0304",
+  "LID-0305",
+  "LID-0306",
+]);
 
 const selectClass =
   "h-11 rounded-md border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-cyan-600";
@@ -188,7 +104,7 @@ const inputClass =
 
 function readUsers() {
   if (typeof window === "undefined") return initialUsers;
-  const saved = window.localStorage.getItem(storageKey);
+  const saved = window.localStorage.getItem(usersStorageKey);
   if (!saved) return initialUsers;
 
   try {
@@ -199,18 +115,44 @@ function readUsers() {
 }
 
 function readApplications() {
-  if (typeof window === "undefined") return applicationsSeed;
+  if (typeof window === "undefined") return [];
   const saved = window.localStorage.getItem(applicationsStorageKey);
   if (!saved) {
-    window.localStorage.setItem(applicationsStorageKey, JSON.stringify(applicationsSeed));
-    return applicationsSeed;
+    window.localStorage.setItem(applicationsStorageKey, JSON.stringify([]));
+    return [];
   }
 
   try {
-    return JSON.parse(saved) as Application[];
+    const applications = JSON.parse(saved) as Application[];
+    const liveApplications = applications.filter((item) => !legacyDemoIds.has(item.id));
+    if (liveApplications.length !== applications.length) {
+      window.localStorage.setItem(applicationsStorageKey, JSON.stringify(liveApplications));
+    }
+    return liveApplications;
   } catch {
-    return applicationsSeed;
+    window.localStorage.setItem(applicationsStorageKey, JSON.stringify([]));
+    return [];
   }
+}
+
+function readActivities() {
+  if (typeof window === "undefined") return [];
+  const saved = window.localStorage.getItem(activitiesStorageKey);
+  if (!saved) return [];
+
+  try {
+    return JSON.parse(saved) as Activity[];
+  } catch {
+    return [];
+  }
+}
+
+function isThisWeek(date: string) {
+  const submitted = new Date(`${date}T00:00:00`);
+  const now = new Date();
+  const weekAgo = new Date();
+  weekAgo.setDate(now.getDate() - 7);
+  return submitted >= weekAgo && submitted <= now;
 }
 
 export default function AdminPage() {
@@ -219,11 +161,13 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState("");
   const [activeMenu, setActiveMenu] = useState("Dashboard");
   const [applications, setApplications] = useState<Application[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [filters, setFilters] = useState({
     period: "",
     sector: "",
     city: "",
     stage: "",
+    status: "",
     teamSize: "",
     minScore: "",
   });
@@ -235,13 +179,14 @@ export default function AdminPage() {
   useEffect(() => {
     const storedUsers = readUsers();
     setUsers(storedUsers);
-    window.localStorage.setItem(storageKey, JSON.stringify(storedUsers));
+    window.localStorage.setItem(usersStorageKey, JSON.stringify(storedUsers));
 
     const sessionEmail = window.localStorage.getItem(sessionKey);
     const sessionUser = storedUsers.find((user) => user.email === sessionEmail);
     if (sessionUser) setActiveUser(sessionUser);
 
     setApplications(readApplications());
+    setActivities(readActivities());
 
     const syncApplications = () => setApplications(readApplications());
     window.addEventListener("focus", syncApplications);
@@ -266,7 +211,24 @@ export default function AdminPage() {
 
   function saveUsers(nextUsers: AdminUser[]) {
     setUsers(nextUsers);
-    window.localStorage.setItem(storageKey, JSON.stringify(nextUsers));
+    window.localStorage.setItem(usersStorageKey, JSON.stringify(nextUsers));
+  }
+
+  function saveActivities(nextActivities: Activity[]) {
+    setActivities(nextActivities);
+    window.localStorage.setItem(activitiesStorageKey, JSON.stringify(nextActivities));
+  }
+
+  function addActivity(title: string, detail: string) {
+    const nextActivities = [
+      {
+        time: new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" }),
+        title,
+        detail,
+      },
+      ...activities,
+    ].slice(0, 20);
+    saveActivities(nextActivities);
   }
 
   function saveApplications(nextApplications: Application[]) {
@@ -300,9 +262,9 @@ export default function AdminPage() {
   }
 
   function moveApplication(id: string, status: ApplicationStatus) {
-    saveApplications(
-      applications.map((item) => (item.id === id ? { ...item, status } : item)),
-    );
+    const application = applications.find((item) => item.id === id);
+    saveApplications(applications.map((item) => (item.id === id ? { ...item, status } : item)));
+    if (application) addActivity(`${application.startup} durumu güncellendi`, status);
   }
 
   function updateScore(id: string, score: number) {
@@ -311,6 +273,12 @@ export default function AdminPage() {
         item.id === id ? { ...item, score: Math.max(0, Math.min(100, score)) } : item,
       ),
     );
+  }
+
+  function setStatusFilter(status: ApplicationStatus) {
+    setFilters({ ...filters, status });
+    setActiveMenu("Başvurular");
+    window.history.replaceState({}, "", `/admin?status=${encodeURIComponent(status)}`);
   }
 
   function createUser(event: FormEvent<HTMLFormElement>) {
@@ -334,6 +302,7 @@ export default function AdminPage() {
     }
 
     saveUsers([...users, nextUser]);
+    addActivity("Yeni yetkili eklendi", nextUser.name);
     setUserNotice("Yeni yetkili tanımlandı.");
     event.currentTarget.reset();
   }
@@ -389,6 +358,7 @@ export default function AdminPage() {
     ];
     setAnnouncements(nextAnnouncements);
     window.localStorage.setItem(announcementsStorageKey, JSON.stringify(nextAnnouncements));
+    addActivity("Girişimci duyurusu gönderildi", title);
     setAnnouncementNotice("Girişimciye duyuru gönderildi.");
     event.currentTarget.reset();
   }
@@ -403,32 +373,40 @@ export default function AdminPage() {
         (!filters.sector || item.sector === filters.sector) &&
         (!filters.city || item.city === filters.city) &&
         (!filters.stage || item.stage === filters.stage) &&
+        (!filters.status || item.status === filters.status) &&
         (!filters.teamSize || item.teamSize >= teamFilter) &&
         (!filters.minScore || item.score >= scoreFilter)
       );
     });
   }, [applications, filters]);
 
-  const dashboardKpis = useMemo(
-    () => [
-      [String(applications.length), "Başvuru"],
-      [
-        String(
-          applications.filter((item) =>
-            ["İnceleniyor", "Jüriye Gönderildi"].includes(item.status),
-          ).length,
-        ),
-        "Ön Değerlendirmede",
-      ],
-      [String(applications.filter((item) => item.status === "Kabul").length), "Programa Kabul"],
-      ...kpis,
-      [String(applications.filter((item) => item.status === "Kabul").length), "Aktif Girişim"],
-    ],
-    [applications],
-  );
+  const metrics = useMemo(() => {
+    const count = (status: ApplicationStatus) =>
+      applications.filter((item) => item.status === status).length;
+
+    return {
+      total: applications.length,
+      week: applications.filter((item) => isThisWeek(item.submittedAt)).length,
+      review: count("İnceleniyor"),
+      jury: count("Jüriye Gönderildi"),
+      accepted: count("Kabul"),
+      waitlist: count("Yedek"),
+      rejected: count("Reddedildi"),
+      new: count("Yeni"),
+    };
+  }, [applications]);
+
+  const statusProgress = applications.length
+    ? Math.round(((metrics.review + metrics.jury + metrics.accepted) / applications.length) * 100)
+    : 0;
+
+  const recentApplications = applications
+    .slice()
+    .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
+    .slice(0, 8);
 
   const uniqueOptions = (key: keyof Application) =>
-    Array.from(new Set(applications.map((item) => String(item[key]))));
+    Array.from(new Set(applications.map((item) => String(item[key])).filter(Boolean)));
 
   if (!activeUser) {
     return (
@@ -440,8 +418,8 @@ export default function AdminPage() {
               Admin ve Program Yönetim Paneli
             </h1>
             <p className="mt-5 max-w-lg text-lg leading-8 text-slate-600">
-              Başvuruları, program süreçlerini, mentorları, eğitimleri, raporları ve
-              landing page içeriklerini tek merkezden yönetin.
+              Canlı başvuruları, yetkilileri, duyuruları ve program operasyonunu tek merkezden
+              yönetin.
             </p>
           </div>
 
@@ -487,13 +465,10 @@ export default function AdminPage() {
 
   return (
     <main className="min-h-screen bg-[#f6fbfc] text-slate-950">
-      <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
+      <div className="grid min-h-screen lg:grid-cols-[240px_1fr]">
         <aside className="border-r border-slate-200 bg-white">
-          <div className="border-b border-slate-200 px-6 py-5">
-            <img src="/lidea-logo.svg" alt="Lidea" className="h-12 w-auto" />
-            <p className="mt-4 text-xs font-bold uppercase tracking-[.18em] text-cyan-700">
-              Program Paneli
-            </p>
+          <div className="border-b border-slate-200 px-5 py-5">
+            <p className="text-lg font-black tracking-tight">LIDEA ADMIN</p>
           </div>
           <nav className="grid gap-1 p-3">
             {menu.map((item) => (
@@ -506,9 +481,16 @@ export default function AdminPage() {
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
                 }`}
               >
-                {item}
+                {item === "Dashboard" ? "●" : item === "Ayarlar" ? "⚙" : "▣"} {item}
               </button>
             ))}
+            <div className="my-3 border-t border-slate-200" />
+            <button
+              onClick={logout}
+              className="rounded-md px-3 py-2.5 text-left text-sm font-semibold text-slate-600 hover:bg-slate-100"
+            >
+              ⇥ Çıkış
+            </button>
           </nav>
         </aside>
 
@@ -516,183 +498,365 @@ export default function AdminPage() {
           <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 bg-white/90 px-6 py-4 backdrop-blur">
             <div>
               <p className="text-xs font-bold uppercase tracking-[.18em] text-cyan-700">
-                {activeMenu}
+                3. DÖNEM / GENEL BAKIŞ
               </p>
-              <h1 className="mt-1 text-2xl font-black">Lidea Merkezi Yönetim</h1>
+              <h1 className="mt-1 text-2xl font-black">Operasyon Dashboard</h1>
             </div>
             <div className="flex items-center gap-3">
+              <span className="grid h-10 w-10 place-items-center rounded-md border border-slate-200 bg-white text-lg">
+                🔔
+              </span>
               <div className="text-right">
                 <p className="text-sm font-black">{activeUser.name}</p>
                 <p className="text-xs text-slate-500">{activeUser.role}</p>
               </div>
-              <button
-                onClick={logout}
-                className="h-10 rounded-md border border-slate-200 bg-white px-4 text-sm font-bold"
-              >
-                Çıkış
-              </button>
             </div>
           </header>
 
           <div className="space-y-6 p-6">
-            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-              {dashboardKpis.map(([value, label]) => (
+            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {[
+                [metrics.total, "Toplam Başvuru", `+${metrics.week} bu hafta`],
+                [metrics.review, "İncelemede", "Admin aksiyonu bekliyor"],
+                [metrics.jury, "Jüri Değerlendirmesinde", "Jüriye gönderildi"],
+                [metrics.accepted, "Kabul Edildi", "Programa seçildi"],
+              ].map(([value, label, sub]) => (
                 <article
                   key={label}
                   className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
                 >
-                  <p className="text-3xl font-black">{value}</p>
-                  <p className="mt-2 text-sm font-bold text-slate-500">{label}</p>
+                  <p className="text-4xl font-black">{value}</p>
+                  <p className="mt-2 text-sm font-black text-slate-700">{label}</p>
+                  <p className="mt-1 text-xs font-semibold text-cyan-700">{sub}</p>
                 </article>
               ))}
             </section>
 
-            <section className="grid gap-6 xl:grid-cols-[1fr_360px]">
-              <div className="rounded-lg border border-slate-200 bg-white">
-                <div className="border-b border-slate-200 p-5">
-                  <div className="flex flex-wrap items-end justify-between gap-4">
+            <section className="grid gap-6 xl:grid-cols-[1fr_340px]">
+              <div className="space-y-6">
+                <section className="rounded-lg border border-slate-200 bg-white p-6">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
                     <div>
-                      <h2 className="text-xl font-black">Başvuru Yönetimi</h2>
+                      <h2 className="text-xl font-black">Başvuru Durumu</h2>
                       <p className="mt-1 text-sm text-slate-500">
-                        Başvuruları filtreleyin, puanlayın ve süreç durumunu ilerletin.
+                        Bekleyen başvuruları birkaç saniyede görün.
                       </p>
                     </div>
-                    <span className="rounded-md bg-cyan-50 px-3 py-2 text-sm font-black text-cyan-800">
-                      {filteredApplications.length} kayıt
-                    </span>
+                    <span className="text-sm font-black text-cyan-800">%{statusProgress}</span>
                   </div>
-
-                  <div className="mt-5 grid gap-3 md:grid-cols-3 xl:grid-cols-6">
-                    <select
-                      className={selectClass}
-                      value={filters.period}
-                      onChange={(e) => setFilters({ ...filters, period: e.target.value })}
-                    >
-                      <option value="">Dönem</option>
-                      {uniqueOptions("period").map((value) => (
-                        <option key={value}>{value}</option>
-                      ))}
-                    </select>
-                    <select
-                      className={selectClass}
-                      value={filters.sector}
-                      onChange={(e) => setFilters({ ...filters, sector: e.target.value })}
-                    >
-                      <option value="">Sektör</option>
-                      {uniqueOptions("sector").map((value) => (
-                        <option key={value}>{value}</option>
-                      ))}
-                    </select>
-                    <select
-                      className={selectClass}
-                      value={filters.city}
-                      onChange={(e) => setFilters({ ...filters, city: e.target.value })}
-                    >
-                      <option value="">Şehir</option>
-                      {uniqueOptions("city").map((value) => (
-                        <option key={value}>{value}</option>
-                      ))}
-                    </select>
-                    <select
-                      className={selectClass}
-                      value={filters.stage}
-                      onChange={(e) => setFilters({ ...filters, stage: e.target.value })}
-                    >
-                      <option value="">Girişim aşaması</option>
-                      {uniqueOptions("stage").map((value) => (
-                        <option key={value}>{value}</option>
-                      ))}
-                    </select>
-                    <input
-                      className={inputClass}
-                      type="number"
-                      min="1"
-                      placeholder="Min. ekip"
-                      value={filters.teamSize}
-                      onChange={(e) => setFilters({ ...filters, teamSize: e.target.value })}
-                    />
-                    <input
-                      className={inputClass}
-                      type="number"
-                      min="0"
-                      max="100"
-                      placeholder="Min. puan"
-                      value={filters.minScore}
-                      onChange={(e) => setFilters({ ...filters, minScore: e.target.value })}
+                  <div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100">
+                    <div
+                      className="h-full rounded-full bg-[#063f46]"
+                      style={{ width: `${statusProgress}%` }}
                     />
                   </div>
-                </div>
+                  <div className="mt-6 grid gap-2">
+                    {[
+                      ["Yeni", metrics.new],
+                      ["İnceleniyor", metrics.review],
+                      ["Jüriye Gönderildi", metrics.jury],
+                      ["Kabul", metrics.accepted],
+                      ["Yedek", metrics.waitlist],
+                      ["Reddedildi", metrics.rejected],
+                    ].map(([status, count]) => (
+                      <button
+                        key={status}
+                        onClick={() => setStatusFilter(status as ApplicationStatus)}
+                        className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50 px-4 py-3 text-left text-sm font-semibold hover:border-cyan-200 hover:bg-cyan-50"
+                      >
+                        <span>{status}</span>
+                        <span className="font-black">{count}</span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[1050px] text-left text-sm">
-                    <thead className="bg-slate-50 text-xs uppercase tracking-[.12em] text-slate-500">
-                      <tr>
-                        <th className="px-5 py-4">Başvuru</th>
-                        <th className="px-5 py-4">Dönem</th>
-                        <th className="px-5 py-4">Sektör</th>
-                        <th className="px-5 py-4">Şehir</th>
-                        <th className="px-5 py-4">Aşama</th>
-                        <th className="px-5 py-4">Ekip</th>
-                        <th className="px-5 py-4">Puan</th>
-                        <th className="px-5 py-4">Durum</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {filteredApplications.map((item) => (
-                        <tr key={item.id} className="align-top">
-                          <td className="px-5 py-4">
-                            <p className="font-black">{item.startup}</p>
-                            <p className="mt-1 text-slate-500">{item.founder}</p>
-                            <p className="mt-1 text-xs text-slate-400">{item.id}</p>
-                          </td>
-                          <td className="px-5 py-4 font-semibold">{item.period}</td>
-                          <td className="px-5 py-4">{item.sector}</td>
-                          <td className="px-5 py-4">{item.city}</td>
-                          <td className="px-5 py-4">{item.stage}</td>
-                          <td className="px-5 py-4">{item.teamSize}</td>
-                          <td className="px-5 py-4">
-                            <input
-                              aria-label={`${item.startup} değerlendirme puanı`}
-                              className="h-10 w-20 rounded-md border border-slate-200 px-2 font-bold"
-                              type="number"
-                              min="0"
-                              max="100"
-                              value={item.score}
-                              onChange={(e) => updateScore(item.id, Number(e.target.value))}
-                            />
-                          </td>
-                          <td className="px-5 py-4">
-                            <select
-                              className={selectClass}
-                              value={item.status}
-                              onChange={(e) =>
-                                moveApplication(item.id, e.target.value as ApplicationStatus)
-                              }
-                            >
-                              {statuses.map((status) => (
-                                <option key={status}>{status}</option>
-                              ))}
-                            </select>
-                          </td>
+                <section className="rounded-lg border border-slate-200 bg-white">
+                  <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 p-5">
+                    <div>
+                      <h2 className="text-xl font-black">Son Başvurular</h2>
+                      <p className="mt-1 text-sm text-slate-500">
+                        Son 5-10 başvurunun hızlı görünümü.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setActiveMenu("Başvurular")}
+                      className="h-10 rounded-md bg-[#063f46] px-4 text-sm font-bold text-white"
+                    >
+                      Tüm Başvuruları Gör →
+                    </button>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[780px] text-left text-sm">
+                      <thead className="bg-slate-50 text-xs uppercase tracking-[.12em] text-slate-500">
+                        <tr>
+                          <th className="px-5 py-4">Girişim</th>
+                          <th className="px-5 py-4">Kurucu</th>
+                          <th className="px-5 py-4">Aşama</th>
+                          <th className="px-5 py-4">Tarih</th>
+                          <th className="px-5 py-4">Durum</th>
+                          <th className="px-5 py-4">İşlem</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {recentApplications.length ? (
+                          recentApplications.map((item) => (
+                            <tr key={item.id}>
+                              <td className="px-5 py-4 font-black">{item.startup}</td>
+                              <td className="px-5 py-4">{item.founder || "-"}</td>
+                              <td className="px-5 py-4">{item.stage}</td>
+                              <td className="px-5 py-4">{item.submittedAt}</td>
+                              <td className="px-5 py-4 font-semibold">{item.status}</td>
+                              <td className="px-5 py-4">
+                                <button
+                                  onClick={() => {
+                                    setFilters({ ...filters, status: item.status });
+                                    setActiveMenu("Başvurular");
+                                  }}
+                                  className="font-black text-cyan-800"
+                                >
+                                  İncele →
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td className="px-5 py-8 text-slate-500" colSpan={6}>
+                              Henüz canlı başvuru yok. 3. dönem başvuru formu doldurulunca burada
+                              görünecek.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+
+                <section id="applications" className="rounded-lg border border-slate-200 bg-white">
+                  <div className="border-b border-slate-200 p-5">
+                    <div className="flex flex-wrap items-end justify-between gap-4">
+                      <div>
+                        <h2 className="text-xl font-black">Başvuru Yönetimi</h2>
+                        <p className="mt-1 text-sm text-slate-500">
+                          Canlı başvuruları filtreleyin, puanlayın ve süreç durumunu ilerletin.
+                        </p>
+                      </div>
+                      <span className="rounded-md bg-cyan-50 px-3 py-2 text-sm font-black text-cyan-800">
+                        {filteredApplications.length} kayıt
+                      </span>
+                    </div>
+
+                    <div className="mt-5 grid gap-3 md:grid-cols-4 xl:grid-cols-7">
+                      <select
+                        className={selectClass}
+                        value={filters.period}
+                        onChange={(e) => setFilters({ ...filters, period: e.target.value })}
+                      >
+                        <option value="">Dönem</option>
+                        {uniqueOptions("period").map((value) => (
+                          <option key={value}>{value}</option>
+                        ))}
+                      </select>
+                      <select
+                        className={selectClass}
+                        value={filters.sector}
+                        onChange={(e) => setFilters({ ...filters, sector: e.target.value })}
+                      >
+                        <option value="">Sektör</option>
+                        {uniqueOptions("sector").map((value) => (
+                          <option key={value}>{value}</option>
+                        ))}
+                      </select>
+                      <select
+                        className={selectClass}
+                        value={filters.city}
+                        onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+                      >
+                        <option value="">Şehir</option>
+                        {uniqueOptions("city").map((value) => (
+                          <option key={value}>{value}</option>
+                        ))}
+                      </select>
+                      <select
+                        className={selectClass}
+                        value={filters.stage}
+                        onChange={(e) => setFilters({ ...filters, stage: e.target.value })}
+                      >
+                        <option value="">Aşama</option>
+                        {uniqueOptions("stage").map((value) => (
+                          <option key={value}>{value}</option>
+                        ))}
+                      </select>
+                      <select
+                        className={selectClass}
+                        value={filters.status}
+                        onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                      >
+                        <option value="">Durum</option>
+                        {statuses.map((status) => (
+                          <option key={status}>{status}</option>
+                        ))}
+                      </select>
+                      <input
+                        className={inputClass}
+                        type="number"
+                        min="1"
+                        placeholder="Min. ekip"
+                        value={filters.teamSize}
+                        onChange={(e) => setFilters({ ...filters, teamSize: e.target.value })}
+                      />
+                      <input
+                        className={inputClass}
+                        type="number"
+                        min="0"
+                        max="100"
+                        placeholder="Min. puan"
+                        value={filters.minScore}
+                        onChange={(e) => setFilters({ ...filters, minScore: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[1050px] text-left text-sm">
+                      <thead className="bg-slate-50 text-xs uppercase tracking-[.12em] text-slate-500">
+                        <tr>
+                          <th className="px-5 py-4">Başvuru</th>
+                          <th className="px-5 py-4">Dönem</th>
+                          <th className="px-5 py-4">Sektör</th>
+                          <th className="px-5 py-4">Şehir</th>
+                          <th className="px-5 py-4">Aşama</th>
+                          <th className="px-5 py-4">Ekip</th>
+                          <th className="px-5 py-4">Puan</th>
+                          <th className="px-5 py-4">Durum</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {filteredApplications.length ? (
+                          filteredApplications.map((item) => (
+                            <tr key={item.id} className="align-top">
+                              <td className="px-5 py-4">
+                                <p className="font-black">{item.startup}</p>
+                                <p className="mt-1 text-slate-500">{item.founder}</p>
+                                <p className="mt-1 text-xs text-slate-400">{item.id}</p>
+                              </td>
+                              <td className="px-5 py-4 font-semibold">{item.period}</td>
+                              <td className="px-5 py-4">{item.sector}</td>
+                              <td className="px-5 py-4">{item.city}</td>
+                              <td className="px-5 py-4">{item.stage}</td>
+                              <td className="px-5 py-4">{item.teamSize}</td>
+                              <td className="px-5 py-4">
+                                <input
+                                  aria-label={`${item.startup} değerlendirme puanı`}
+                                  className="h-10 w-20 rounded-md border border-slate-200 px-2 font-bold"
+                                  type="number"
+                                  min="0"
+                                  max="100"
+                                  value={item.score}
+                                  onChange={(e) => updateScore(item.id, Number(e.target.value))}
+                                />
+                              </td>
+                              <td className="px-5 py-4">
+                                <select
+                                  className={selectClass}
+                                  value={item.status}
+                                  onChange={(e) =>
+                                    moveApplication(item.id, e.target.value as ApplicationStatus)
+                                  }
+                                >
+                                  {statuses.map((status) => (
+                                    <option key={status}>{status}</option>
+                                  ))}
+                                </select>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td className="px-5 py-8 text-slate-500" colSpan={8}>
+                              Filtreye uygun canlı başvuru bulunamadı.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
               </div>
 
               <aside className="space-y-6">
                 <section className="rounded-lg border border-slate-200 bg-white p-5">
-                  <h2 className="text-lg font-black">Durum Akışı</h2>
-                  <div className="mt-5 space-y-3">
-                    {statuses.map((status, index) => (
-                      <div key={status} className="flex items-center gap-3">
-                        <span className="grid h-8 w-8 place-items-center rounded-md bg-[#063f46] text-xs font-black text-white">
-                          {index + 1}
-                        </span>
-                        <span className="text-sm font-bold">{status}</span>
-                      </div>
+                  <h2 className="text-lg font-black">Hızlı İşlemler</h2>
+                  <div className="mt-4 grid gap-3">
+                    {[
+                      ["Yeni Başvuru", "/basvuru"],
+                      ["Başvuruları İncele", "#applications"],
+                      ["Jüriye Ata", "/juri"],
+                      ["Program Takvimini Yönet", "#program"],
+                    ].map(([label, href]) => (
+                      <a
+                        key={label}
+                        href={href}
+                        className="rounded-md border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 hover:bg-slate-50"
+                      >
+                        {label} →
+                      </a>
                     ))}
+                  </div>
+                </section>
+
+                <section id="program" className="rounded-lg border border-slate-200 bg-white p-5">
+                  <h2 className="text-lg font-black">LIDEA 3. DÖNEM</h2>
+                  <div className="mt-5 space-y-4 text-sm">
+                    <div>
+                      <div className="flex justify-between font-bold">
+                        <span>Başvurular</span>
+                        <span>{applications.length ? "Aktif" : "Beklemede"}</span>
+                      </div>
+                      <div className="mt-2 h-2 rounded-full bg-slate-100">
+                        <div
+                          className="h-2 rounded-full bg-cyan-700"
+                          style={{ width: applications.length ? "100%" : "8%" }}
+                        />
+                      </div>
+                    </div>
+                    <div className="rounded-md bg-slate-50 p-3">
+                      <p className="text-xs font-bold text-slate-500">Son Başvuru</p>
+                      <p className="mt-1 font-black">30.09.2026</p>
+                    </div>
+                    <div className="rounded-md bg-slate-50 p-3">
+                      <p className="text-xs font-bold text-slate-500">Programa Kabul</p>
+                      <p className="mt-1 font-black">{metrics.accepted} Girişim</p>
+                    </div>
+                    <div className="rounded-md bg-slate-50 p-3">
+                      <p className="text-xs font-bold text-slate-500">Demo Day</p>
+                      <p className="mt-1 font-black">Henüz planlanmadı</p>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="rounded-lg border border-slate-200 bg-white p-5">
+                  <h2 className="text-lg font-black">Son Aktiviteler</h2>
+                  <div className="mt-4 space-y-4">
+                    {activities.length ? (
+                      activities.slice(0, 6).map((activity, index) => (
+                        <div
+                          key={`${activity.time}-${index}`}
+                          className="grid grid-cols-[48px_1fr] gap-3"
+                        >
+                          <p className="text-xs font-black text-cyan-800">{activity.time}</p>
+                          <div>
+                            <p className="text-sm font-black">{activity.title}</p>
+                            <p className="mt-1 text-xs text-slate-500">{activity.detail}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="rounded-md bg-slate-50 p-3 text-sm text-slate-500">
+                        Henüz aktivite yok.
+                      </p>
+                    )}
                   </div>
                 </section>
 
@@ -746,18 +910,6 @@ export default function AdminPage() {
                   {userNotice ? (
                     <p className="mt-3 text-sm font-semibold text-cyan-800">{userNotice}</p>
                   ) : null}
-                  <div className="mt-5 space-y-3">
-                    {users.map((user) => (
-                      <div
-                        key={user.email}
-                        className="rounded-md border border-slate-100 bg-slate-50 p-3"
-                      >
-                        <p className="text-sm font-black">{user.name}</p>
-                        <p className="mt-1 text-xs text-slate-500">{user.email}</p>
-                        <p className="mt-1 text-xs font-bold text-cyan-800">{user.role}</p>
-                      </div>
-                    ))}
-                  </div>
                 </section>
 
                 <section className="rounded-lg border border-slate-200 bg-white p-5">
@@ -789,20 +941,6 @@ export default function AdminPage() {
                       {announcementNotice}
                     </p>
                   ) : null}
-                  <div className="mt-5 space-y-3">
-                    {announcements.slice(0, 3).map((announcement) => (
-                      <div
-                        key={announcement.id}
-                        className="rounded-md border border-slate-100 bg-slate-50 p-3"
-                      >
-                        <p className="text-sm font-black">{announcement.title}</p>
-                        <p className="mt-1 text-xs text-slate-500">{announcement.to}</p>
-                        <p className="mt-2 text-xs leading-5 text-slate-600">
-                          {announcement.message}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
                 </section>
               </aside>
             </section>
