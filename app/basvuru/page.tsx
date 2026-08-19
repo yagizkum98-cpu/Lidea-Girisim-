@@ -3,6 +3,34 @@
 import { FormEvent, useState } from "react";
 import Header from "@/components/Header";
 
+const applicationsStorageKey = "lidea-applications";
+
+type StoredApplication = {
+  id: string;
+  founder: string;
+  email: string;
+  startup: string;
+  period: string;
+  sector: string;
+  city: string;
+  stage: string;
+  teamSize: number;
+  score: number;
+  status: "Yeni";
+  submittedAt: string;
+};
+
+function readApplications() {
+  const saved = window.localStorage.getItem(applicationsStorageKey);
+  if (!saved) return [];
+
+  try {
+    return JSON.parse(saved) as StoredApplication[];
+  } catch {
+    return [];
+  }
+}
+
 export default function Apply() {
   const [sent, setSent] = useState(false);
 
@@ -15,7 +43,30 @@ export default function Apply() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    if (r.ok) setSent(true);
+    if (r.ok) {
+      const applications = readApplications();
+      const application: StoredApplication = {
+        id: `LID-${Date.now().toString().slice(-6)}`,
+        founder: String(data.name || ""),
+        email: String(data.email || ""),
+        startup: String(data.startup || ""),
+        period: "3. Dönem",
+        sector: String(data.sector || "Belirtilmedi"),
+        city: String(data.city || ""),
+        stage: String(data.stage || "Fikir"),
+        teamSize: Number(data.teamSize || 1),
+        score: 0,
+        status: "Yeni",
+        submittedAt: new Date().toISOString().slice(0, 10),
+      };
+
+      window.localStorage.setItem(
+        applicationsStorageKey,
+        JSON.stringify([application, ...applications]),
+      );
+      window.dispatchEvent(new Event("lidea-applications-updated"));
+      setSent(true);
+    }
   }
 
   return (
@@ -44,6 +95,7 @@ export default function Apply() {
               ["email", "E-posta"],
               ["phone", "Telefon"],
               ["startup", "Girişim Adı"],
+              ["sector", "Sektör"],
               ["city", "Şehir"],
             ].map(([n, l]) => (
               <label className="font-bold" key={n}>
@@ -64,6 +116,17 @@ export default function Apply() {
                 <option>İlk müşteriler</option>
                 <option>Gelir elde ediyor</option>
               </select>
+            </label>
+            <label className="font-bold">
+              Ekip Büyüklüğü
+              <input
+                name="teamSize"
+                type="number"
+                min="1"
+                defaultValue="1"
+                required
+                className="mt-2 w-full rounded-2xl border border-cyan-700/20 bg-white/75 p-4 font-normal outline-none shadow-[0_0_20px_rgba(23,230,210,.08)] focus:border-[#00a6c8] focus:shadow-[0_0_24px_rgba(23,230,210,.28)]"
+              />
             </label>
             <label className="font-bold">
               Hangi problemi çözüyorsunuz?

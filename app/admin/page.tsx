@@ -49,6 +49,7 @@ type Announcement = {
 const storageKey = "lidea-admin-users";
 const sessionKey = "lidea-admin-session";
 const announcementsStorageKey = "lidea-announcements";
+const applicationsStorageKey = "lidea-applications";
 
 const initialUsers: AdminUser[] = [
   {
@@ -175,12 +176,8 @@ const applicationsSeed: Application[] = [
 ];
 
 const kpis = [
-  ["327", "Başvuru"],
-  ["85", "Ön Değerlendirmede"],
-  ["40", "Programa Kabul"],
   ["24", "Aktif Mentor"],
   ["18", "Eğitim"],
-  ["32", "Aktif Girişim"],
 ];
 
 const selectClass =
@@ -201,12 +198,27 @@ function readUsers() {
   }
 }
 
+function readApplications() {
+  if (typeof window === "undefined") return applicationsSeed;
+  const saved = window.localStorage.getItem(applicationsStorageKey);
+  if (!saved) {
+    window.localStorage.setItem(applicationsStorageKey, JSON.stringify(applicationsSeed));
+    return applicationsSeed;
+  }
+
+  try {
+    return JSON.parse(saved) as Application[];
+  } catch {
+    return applicationsSeed;
+  }
+}
+
 export default function AdminPage() {
   const [users, setUsers] = useState<AdminUser[]>(initialUsers);
   const [activeUser, setActiveUser] = useState<AdminUser | null>(null);
   const [loginError, setLoginError] = useState("");
   const [activeMenu, setActiveMenu] = useState("Dashboard");
-  const [applications, setApplications] = useState(applicationsSeed);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [filters, setFilters] = useState({
     period: "",
     sector: "",
@@ -229,6 +241,13 @@ export default function AdminPage() {
     const sessionUser = storedUsers.find((user) => user.email === sessionEmail);
     if (sessionUser) setActiveUser(sessionUser);
 
+    setApplications(readApplications());
+
+    const syncApplications = () => setApplications(readApplications());
+    window.addEventListener("focus", syncApplications);
+    window.addEventListener("storage", syncApplications);
+    window.addEventListener("lidea-applications-updated", syncApplications);
+
     const savedAnnouncements = window.localStorage.getItem(announcementsStorageKey);
     if (savedAnnouncements) {
       try {
@@ -237,11 +256,23 @@ export default function AdminPage() {
         setAnnouncements([]);
       }
     }
+
+    return () => {
+      window.removeEventListener("focus", syncApplications);
+      window.removeEventListener("storage", syncApplications);
+      window.removeEventListener("lidea-applications-updated", syncApplications);
+    };
   }, []);
 
   function saveUsers(nextUsers: AdminUser[]) {
     setUsers(nextUsers);
     window.localStorage.setItem(storageKey, JSON.stringify(nextUsers));
+  }
+
+  function saveApplications(nextApplications: Application[]) {
+    setApplications(nextApplications);
+    window.localStorage.setItem(applicationsStorageKey, JSON.stringify(nextApplications));
+    window.dispatchEvent(new Event("lidea-applications-updated"));
   }
 
   function login(event: FormEvent<HTMLFormElement>) {
@@ -269,14 +300,14 @@ export default function AdminPage() {
   }
 
   function moveApplication(id: string, status: ApplicationStatus) {
-    setApplications((items) =>
-      items.map((item) => (item.id === id ? { ...item, status } : item)),
+    saveApplications(
+      applications.map((item) => (item.id === id ? { ...item, status } : item)),
     );
   }
 
   function updateScore(id: string, score: number) {
-    setApplications((items) =>
-      items.map((item) =>
+    saveApplications(
+      applications.map((item) =>
         item.id === id ? { ...item, score: Math.max(0, Math.min(100, score)) } : item,
       ),
     );
@@ -377,6 +408,24 @@ export default function AdminPage() {
       );
     });
   }, [applications, filters]);
+
+  const dashboardKpis = useMemo(
+    () => [
+      [String(applications.length), "Başvuru"],
+      [
+        String(
+          applications.filter((item) =>
+            ["İnceleniyor", "Jüriye Gönderildi"].includes(item.status),
+          ).length,
+        ),
+        "Ön Değerlendirmede",
+      ],
+      [String(applications.filter((item) => item.status === "Kabul").length), "Programa Kabul"],
+      ...kpis,
+      [String(applications.filter((item) => item.status === "Kabul").length), "Aktif Girişim"],
+    ],
+    [applications],
+  );
 
   const uniqueOptions = (key: keyof Application) =>
     Array.from(new Set(applications.map((item) => String(item[key]))));
@@ -487,7 +536,7 @@ export default function AdminPage() {
 
           <div className="space-y-6 p-6">
             <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-              {kpis.map(([value, label]) => (
+              {dashboardKpis.map(([value, label]) => (
                 <article
                   key={label}
                   className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
