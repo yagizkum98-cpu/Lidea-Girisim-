@@ -28,8 +28,8 @@ const sidebarLinks = [
   ["Jüri", "/juri"],
   ["Program", "/admin/program"],
   ["Bildirimler", "/admin/bildirimler"],
-  ["Raporlar", "/admin"],
-  ["Ayarlar", "/admin"],
+  ["Raporlar", "/admin/raporlar"],
+  ["Ayarlar", "/admin/ayarlar"],
 ];
 
 export default function NotificationsPage() {

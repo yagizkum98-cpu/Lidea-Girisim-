@@ -293,8 +293,8 @@ export default function ProgramManagementPage() {
               ["Mentorlar", "/admin/mentorlar"],
               ["Program", "/admin/program"],
               ["Bildirimler", "/admin/bildirimler"],
-              ["Raporlar", "/admin"],
-              ["Ayarlar", "/admin"],
+              ["Raporlar", "/admin/raporlar"],
+              ["Ayarlar", "/admin/ayarlar"],
             ].map(([label, href]) => (
               <Link
                 key={label}
