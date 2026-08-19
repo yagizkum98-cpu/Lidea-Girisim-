@@ -78,15 +78,25 @@ export default function Home() {
               </a>
             </div>
           </div>
-          <div className="card p-8">
-            <img
-              src="/lidea-logo.svg"
-              alt="Lidea Yalın Idea Girişim Programı"
-              className="h-auto w-full max-w-[300px]"
-            />
-            <div className="mt-20 text-7xl font-black">03</div>
-            <div className="mt-2 text-3xl font-black">DÖNEM</div>
-            <div className="mt-12 h-2 rounded-full bg-gradient-to-r from-[#00a6c8] via-[#17e6d2] to-[#8ad66f] shadow-[0_0_28px_rgba(23,230,210,.7)]" />
+          <div
+            className="relative min-h-[520px] overflow-hidden rounded-[1.75rem] border border-cyan-200/30 bg-[#052f36] p-8 text-white shadow-[0_24px_80px_rgba(0,86,102,.28),0_0_42px_rgba(23,230,210,.32)]"
+            style={{
+              backgroundImage:
+                "linear-gradient(180deg, rgba(5, 47, 54, .2), rgba(5, 47, 54, .72)), url('/lidea-pegasus-mvp.png')",
+              backgroundPosition: "center",
+              backgroundSize: "cover",
+            }}
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(23,230,210,.18),transparent_42%)]" />
+            <div className="relative flex h-full min-h-[456px] flex-col justify-end">
+              <div className="text-7xl font-black drop-shadow-[0_0_20px_rgba(23,230,210,.65)]">
+                03
+              </div>
+              <div className="mt-2 text-3xl font-black drop-shadow-[0_0_16px_rgba(23,230,210,.75)]">
+                DÖNEM
+              </div>
+              <div className="mt-8 h-2 rounded-full bg-gradient-to-r from-[#00a6c8] via-[#17e6d2] to-[#8ad66f] shadow-[0_0_28px_rgba(23,230,210,.7)]" />
+            </div>
           </div>
         </div>
       </section>
