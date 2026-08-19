@@ -25,10 +25,19 @@ type StartupProfile = {
   website: string;
 };
 
+type Announcement = {
+  id: string;
+  to: string;
+  title: string;
+  message: string;
+  createdAt: string;
+};
+
 const usersStorageKey = "lidea-admin-users";
 const entrepreneurSessionKey = "lidea-entrepreneur-session";
 const progressStorageKey = "lidea-entrepreneur-progress";
 const profileStorageKey = "lidea-entrepreneur-profile";
+const announcementsStorageKey = "lidea-announcements";
 
 const defaultProfile: StartupProfile = {
   name: "LideaCheck",
@@ -119,6 +128,7 @@ export default function EntrepreneurPanel() {
   const [progress, setProgress] = useState(45);
   const [profile, setProfile] = useState(defaultProfile);
   const [notice, setNotice] = useState("");
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
   useEffect(() => {
     const users = getUsers();
@@ -131,6 +141,15 @@ export default function EntrepreneurPanel() {
     const savedProgress = Number(window.localStorage.getItem(progressStorageKey));
     setProgress(Number.isFinite(savedProgress) && savedProgress > 0 ? savedProgress : 45);
     setProfile(getProfile());
+
+    const savedAnnouncements = window.localStorage.getItem(announcementsStorageKey);
+    if (savedAnnouncements) {
+      try {
+        setAnnouncements(JSON.parse(savedAnnouncements) as Announcement[]);
+      } catch {
+        setAnnouncements([]);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -142,6 +161,13 @@ export default function EntrepreneurPanel() {
   const completedSteps = useMemo(() => {
     return Math.max(1, Math.round((progress / 100) * journey.length));
   }, [progress]);
+
+  const myAnnouncements = useMemo(() => {
+    if (!activeUser) return [];
+    return announcements.filter(
+      (announcement) => announcement.to.toLowerCase() === activeUser.email.toLowerCase(),
+    );
+  }, [activeUser, announcements]);
 
   function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -457,6 +483,35 @@ export default function EntrepreneurPanel() {
                         {document}
                       </label>
                     ))}
+                  </div>
+                </section>
+
+                <section className="rounded-lg border border-slate-200 bg-white p-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <h2 className="text-lg font-black">Bildirimler</h2>
+                    <span className="rounded-md bg-cyan-50 px-3 py-1 text-xs font-black text-cyan-800">
+                      {myAnnouncements.length}
+                    </span>
+                  </div>
+                  <div className="mt-4 space-y-3">
+                    {myAnnouncements.length ? (
+                      myAnnouncements.map((announcement) => (
+                        <div
+                          key={announcement.id}
+                          className="rounded-md border border-cyan-100 bg-cyan-50 p-3"
+                        >
+                          <p className="text-sm font-black">{announcement.title}</p>
+                          <p className="mt-1 text-xs text-cyan-900">{announcement.createdAt}</p>
+                          <p className="mt-2 text-sm leading-6 text-slate-700">
+                            {announcement.message}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="rounded-md bg-slate-50 p-3 text-sm text-slate-500">
+                        Henüz duyuru yok.
+                      </p>
+                    )}
                   </div>
                 </section>
 

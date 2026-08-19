@@ -29,11 +29,26 @@ type AdminUser = {
   name: string;
   email: string;
   password: string;
-  role: "Süper Admin" | "Program Yetkilisi" | "Değerlendirme Yetkilisi" | "Girişimci";
+  role:
+    | "Süper Admin"
+    | "Admin"
+    | "Program Yetkilisi"
+    | "Değerlendirme Yetkilisi"
+    | "Mentor"
+    | "Girişimci";
+};
+
+type Announcement = {
+  id: string;
+  to: string;
+  title: string;
+  message: string;
+  createdAt: string;
 };
 
 const storageKey = "lidea-admin-users";
 const sessionKey = "lidea-admin-session";
+const announcementsStorageKey = "lidea-announcements";
 
 const initialUsers: AdminUser[] = [
   {
@@ -202,6 +217,8 @@ export default function AdminPage() {
   });
   const [userNotice, setUserNotice] = useState("");
   const [passwordNotice, setPasswordNotice] = useState("");
+  const [announcementNotice, setAnnouncementNotice] = useState("");
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
   useEffect(() => {
     const storedUsers = readUsers();
@@ -211,6 +228,15 @@ export default function AdminPage() {
     const sessionEmail = window.localStorage.getItem(sessionKey);
     const sessionUser = storedUsers.find((user) => user.email === sessionEmail);
     if (sessionUser) setActiveUser(sessionUser);
+
+    const savedAnnouncements = window.localStorage.getItem(announcementsStorageKey);
+    if (savedAnnouncements) {
+      try {
+        setAnnouncements(JSON.parse(savedAnnouncements) as Announcement[]);
+      } catch {
+        setAnnouncements([]);
+      }
+    }
   }, []);
 
   function saveUsers(nextUsers: AdminUser[]) {
@@ -305,6 +331,34 @@ export default function AdminPage() {
     saveUsers(nextUsers);
     setActiveUser({ ...activeUser, password: next });
     setPasswordNotice("Şifre güncellendi.");
+    event.currentTarget.reset();
+  }
+
+  function sendAnnouncement(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const to = String(form.get("to") || "");
+    const title = String(form.get("title") || "").trim();
+    const message = String(form.get("message") || "").trim();
+
+    if (!to || !title || !message) {
+      setAnnouncementNotice("Duyuru alıcısı, başlık ve mesaj zorunlu.");
+      return;
+    }
+
+    const nextAnnouncements = [
+      {
+        id: crypto.randomUUID(),
+        to,
+        title,
+        message,
+        createdAt: new Date().toLocaleString("tr-TR"),
+      },
+      ...announcements,
+    ];
+    setAnnouncements(nextAnnouncements);
+    window.localStorage.setItem(announcementsStorageKey, JSON.stringify(nextAnnouncements));
+    setAnnouncementNotice("Girişimciye duyuru gönderildi.");
     event.currentTarget.reset();
   }
 
@@ -629,8 +683,10 @@ export default function AdminPage() {
                       className={inputClass}
                     />
                     <select name="role" className={selectClass} defaultValue="Program Yetkilisi">
+                      <option>Admin</option>
                       <option>Program Yetkilisi</option>
                       <option>Değerlendirme Yetkilisi</option>
+                      <option>Mentor</option>
                       <option>Girişimci</option>
                       <option>Süper Admin</option>
                     </select>
@@ -650,6 +706,51 @@ export default function AdminPage() {
                         <p className="text-sm font-black">{user.name}</p>
                         <p className="mt-1 text-xs text-slate-500">{user.email}</p>
                         <p className="mt-1 text-xs font-bold text-cyan-800">{user.role}</p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="rounded-lg border border-slate-200 bg-white p-5">
+                  <h2 className="text-lg font-black">Girişimci Duyurusu</h2>
+                  <form onSubmit={sendAnnouncement} className="mt-4 grid gap-3">
+                    <select name="to" className={selectClass} defaultValue="">
+                      <option value="">Girişimci seç</option>
+                      {users
+                        .filter((user) => user.role === "Girişimci")
+                        .map((user) => (
+                          <option key={user.email} value={user.email}>
+                            {user.name} - {user.email}
+                          </option>
+                        ))}
+                    </select>
+                    <input name="title" placeholder="Duyuru başlığı" className={inputClass} />
+                    <textarea
+                      name="message"
+                      placeholder="Duyuru mesajı"
+                      rows={4}
+                      className="rounded-md border border-slate-200 bg-white p-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-cyan-600"
+                    />
+                    <button className="h-11 rounded-md bg-[#063f46] px-4 text-sm font-bold text-white">
+                      Duyuru Gönder
+                    </button>
+                  </form>
+                  {announcementNotice ? (
+                    <p className="mt-3 text-sm font-semibold text-cyan-800">
+                      {announcementNotice}
+                    </p>
+                  ) : null}
+                  <div className="mt-5 space-y-3">
+                    {announcements.slice(0, 3).map((announcement) => (
+                      <div
+                        key={announcement.id}
+                        className="rounded-md border border-slate-100 bg-slate-50 p-3"
+                      >
+                        <p className="text-sm font-black">{announcement.title}</p>
+                        <p className="mt-1 text-xs text-slate-500">{announcement.to}</p>
+                        <p className="mt-2 text-xs leading-5 text-slate-600">
+                          {announcement.message}
+                        </p>
                       </div>
                     ))}
                   </div>
