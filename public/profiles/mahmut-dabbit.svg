@@ -1,0 +1,24 @@
+<svg width="640" height="640" viewBox="0 0 640 640" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Mahmut Dabbit Profil Görseli</title>
+  <desc id="desc">Mahmut Dabbit için profil görsel alanı</desc>
+  <rect width="640" height="640" fill="#f0d991"/>
+  <path d="M0 72h640v430H0V72Z" fill="#d9a35f"/>
+  <path d="M0 89c92 86 173 123 244 112 87-14 115-107 209-104 68 3 124 55 187 129v272H0V89Z" fill="#2f8f86" opacity=".7"/>
+  <path d="M0 284c84-75 165-97 242-66 84 34 130 128 225 116 67-9 118-68 173-149v338H0V284Z" fill="#2963a0" opacity=".62"/>
+  <path d="M31 444c99-111 195-142 288-92 96 51 195 32 296-58" stroke="#d85f3f" stroke-width="24" stroke-linecap="round"/>
+  <path d="M23 153c84 16 151 7 201-27 58-39 133-37 225 8 67 33 123 40 168 22" stroke="#f5d442" stroke-width="20" stroke-linecap="round"/>
+  <path d="M120 256c59 43 123 53 192 30 85-28 151-7 198 63" stroke="#173f56" stroke-width="14" stroke-linecap="round"/>
+  <path d="M356 224c46 8 79 45 78 91l-2 89H257l-2-91c-1-48 35-88 83-91l18 2Z" fill="#d39a72"/>
+  <path d="M242 359c33-42 67-63 103-63 43 0 79 24 109 72 37 20 67 58 89 115 13 33-12 69-48 69H187c-37 0-62-37-48-71 21-53 55-94 103-122Z" fill="#1c1b1a"/>
+  <path d="M224 386c72 32 148 33 229 4 37 36 64 90 81 162H150c19-76 44-131 74-166Z" fill="#eef0f2"/>
+  <path d="M226 384c71 38 149 40 234 6" stroke="#1e293b" stroke-width="42" stroke-linecap="round"/>
+  <circle cx="343" cy="221" r="92" fill="#d99a73"/>
+  <path d="M247 204c10-57 43-91 99-101 66 9 101 45 107 107-79-26-147-28-206-6Z" fill="#2b211b"/>
+  <path d="M289 232c12-8 27-9 43-2M356 229c16-5 30-3 42 5" stroke="#38241a" stroke-width="9" stroke-linecap="round"/>
+  <ellipse cx="313" cy="250" rx="14" ry="8" fill="#1b1512"/>
+  <ellipse cx="378" cy="250" rx="14" ry="8" fill="#1b1512"/>
+  <path d="M304 295c28 25 60 26 96 3" stroke="#1f1814" stroke-width="31" stroke-linecap="round"/>
+  <path d="M328 280c17 10 35 10 53 0" stroke="#f4c6a8" stroke-width="8" stroke-linecap="round"/>
+  <path d="M250 552h306" stroke="#0f172a" stroke-width="38" stroke-linecap="round"/>
+  <circle cx="320" cy="320" r="302" stroke="#17e6d2" stroke-opacity=".38" stroke-width="10"/>
+</svg>

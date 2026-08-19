@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #052f36;
+  --sea: #00a6c8;
+  --lagoon: #17e6d2;
+  --pine: #0b7f5a;
+  --lycia: #8ad66f;
+  --paper: #eafff8;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(23, 230, 210, .58), transparent 28rem),
+    radial-gradient(circle at 84% 14%, rgba(138, 214, 111, .46), transparent 25rem),
+    radial-gradient(circle at 50% 100%, rgba(0, 166, 200, .42), transparent 34rem),
+    linear-gradient(135deg, #eafff8 0%, #d8fbff 42%, #effff1 100%);
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  content: "";
+  background:
+    linear-gradient(115deg, transparent 0 35%, rgba(23, 230, 210, .26) 45%, transparent 56%),
+    linear-gradient(65deg, transparent 0 52%, rgba(138, 214, 111, .22) 60%, transparent 68%);
+  filter: blur(18px);
+}
+
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(0, 166, 200, .14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11, 127, 90, .12) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+.card {
+  border: 1px solid rgba(0, 166, 200, .22);
+  background: rgba(239, 255, 250, .76);
+  border-radius: 24px;
+  box-shadow:
+    0 24px 70px rgba(0, 86, 102, .14),
+    0 0 34px rgba(23, 230, 210, .18);
+  backdrop-filter: blur(18px);
+}
