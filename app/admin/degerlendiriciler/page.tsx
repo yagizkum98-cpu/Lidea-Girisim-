@@ -21,6 +21,7 @@ const sidebarLinks = [
   ["Başvurular", "/admin/basvurular"],
   ["Girişimler", "/admin/girisimler"],
   ["Değerlendiriciler", "/admin/degerlendiriciler"],
+  ["Mentorlar", "/admin/mentorlar"],
   ["Program", "/admin/program"],
   ["Bildirimler", "/admin"],
   ["Raporlar", "/admin"],

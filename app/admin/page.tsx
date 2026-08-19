@@ -74,6 +74,7 @@ const menu = [
   "Girişimler",
   "Jüri",
   "Değerlendiriciler",
+  "Mentorlar",
   "Program",
   "Bildirimler",
   "Raporlar",
@@ -489,6 +490,10 @@ export default function AdminPage() {
               }
               if (item === "Değerlendiriciler") {
                 window.location.href = "/admin/degerlendiriciler";
+                return;
+              }
+              if (item === "Mentorlar") {
+                window.location.href = "/admin/mentorlar";
                 return;
               }
               if (item === "Program") {

@@ -11,35 +11,22 @@ import {
   startupStatuses,
   syncAcceptedApplicationsToStartups,
 } from "@/lib/startups";
+import { readMentors } from "@/lib/mentors";
 
-const usersStorageKey = "lidea-admin-users";
 const inputClass =
   "h-11 rounded-md border border-slate-200 bg-white px-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-cyan-600";
-
-function readMentors() {
-  const saved = window.localStorage.getItem(usersStorageKey);
-  if (!saved) return [];
-
-  try {
-    return (JSON.parse(saved) as { name: string; email: string; role: string }[]).filter(
-      (user) => user.role === "Mentor",
-    );
-  } catch {
-    return [];
-  }
-}
 
 export default function StartupDetailPage() {
   const params = useParams<{ id: string }>();
   const [startup, setStartup] = useState<Startup | null>(null);
   const [tab, setTab] = useState("Genel");
-  const [mentors, setMentors] = useState<{ name: string; email: string; role: string }[]>([]);
+  const [mentors, setMentors] = useState<{ id: string; name: string; email: string; status: string; expertise: string[] }[]>([]);
   const [notice, setNotice] = useState("");
 
   useEffect(() => {
     const startups = syncAcceptedApplicationsToStartups();
     setStartup(startups.find((item) => item.id === params.id) || null);
-    setMentors(readMentors());
+    setMentors(readMentors().filter((mentor) => mentor.status === "Aktif"));
   }, [params.id]);
 
   function persist(nextStartup: Startup, message: string) {
@@ -143,11 +130,22 @@ export default function StartupDetailPage() {
     if (!startup) return;
     const form = new FormData(event.currentTarget);
     const mentorName = String(form.get("mentorName") || "");
+    const selectedMentor = mentors.find((mentor) => mentor.name === mentorName);
     persist(
       {
         ...startup,
         mentor: mentorName
-          ? { mentorName, expertise: String(form.get("expertise") || ""), meetingCount: 0, lastMeeting: "" }
+          ? {
+              mentorId: selectedMentor?.id,
+              mentorEmail: selectedMentor?.email,
+              mentorName,
+              expertise: String(form.get("expertise") || selectedMentor?.expertise[0] || ""),
+              assignmentType: "Ana Mentor",
+              startDate: new Date().toISOString().slice(0, 10),
+              targetMeetingCount: 4,
+              meetingCount: startup.mentor?.meetingCount || 0,
+              lastMeeting: startup.mentor?.lastMeeting || "",
+            }
           : null,
       },
       "Mentor ataması güncellendi.",

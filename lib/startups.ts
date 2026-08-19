@@ -26,8 +26,13 @@ export type StartupNote = {
 };
 
 export type MentorAssignment = {
+  mentorId?: string;
+  mentorEmail?: string;
   mentorName: string;
   expertise: string;
+  assignmentType?: "Ana Mentor" | "Alan Mentoru";
+  startDate?: string;
+  targetMeetingCount?: number;
   meetingCount: number;
   lastMeeting: string;
 };

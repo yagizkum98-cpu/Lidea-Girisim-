@@ -290,6 +290,7 @@ export default function ProgramManagementPage() {
               ["Girişimler", "/admin/girisimler"],
               ["Jüri", "/juri"],
               ["Değerlendiriciler", "/admin/degerlendiriciler"],
+              ["Mentorlar", "/admin/mentorlar"],
               ["Program", "/admin/program"],
               ["Bildirimler", "/admin"],
               ["Raporlar", "/admin"],
