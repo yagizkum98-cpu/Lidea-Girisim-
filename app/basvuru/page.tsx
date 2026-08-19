@@ -2,25 +2,9 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Header from "@/components/Header";
+import { addAdminActivity, normalizeApplication, readApplications, writeApplications } from "@/lib/applications";
 
-const applicationsStorageKey = "lidea-applications";
 const programStorageKey = "lidea-program";
-const activitiesStorageKey = "lidea-admin-activities";
-
-type StoredApplication = {
-  id: string;
-  founder: string;
-  email: string;
-  startup: string;
-  period: string;
-  sector: string;
-  city: string;
-  stage: string;
-  teamSize: number;
-  score: number;
-  status: "Yeni";
-  submittedAt: string;
-};
 
 type ProgramSettings = {
   period: string;
@@ -29,29 +13,12 @@ type ProgramSettings = {
   requiredStages: string[];
 };
 
-type Activity = {
-  time: string;
-  title: string;
-  detail: string;
-};
-
 const fallbackProgram: ProgramSettings = {
   period: "3. Dönem",
   applicationOpen: true,
   applicationDeadline: "",
   requiredStages: ["Fikir", "Prototip", "MVP", "İlk Müşteri", "Gelir Elde Ediyor"],
 };
-
-function readApplications() {
-  const saved = window.localStorage.getItem(applicationsStorageKey);
-  if (!saved) return [];
-
-  try {
-    return JSON.parse(saved) as StoredApplication[];
-  } catch {
-    return [];
-  }
-}
 
 function readProgramSettings() {
   const saved = window.localStorage.getItem(programStorageKey);
@@ -62,31 +29,6 @@ function readProgramSettings() {
   } catch {
     return fallbackProgram;
   }
-}
-
-function addActivity(title: string, detail: string) {
-  const saved = window.localStorage.getItem(activitiesStorageKey);
-  let activities: Activity[] = [];
-
-  try {
-    activities = saved ? (JSON.parse(saved) as Activity[]) : [];
-  } catch {
-    activities = [];
-  }
-
-  window.localStorage.setItem(
-    activitiesStorageKey,
-    JSON.stringify(
-      [
-        {
-          time: new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" }),
-          title,
-          detail,
-        },
-        ...activities,
-      ].slice(0, 20),
-    ),
-  );
 }
 
 export default function Apply() {
@@ -121,27 +63,39 @@ export default function Apply() {
 
     if (response.ok) {
       const applications = readApplications();
-      const application: StoredApplication = {
-        id: `LID-${Date.now().toString().slice(-6)}`,
+      const id = `LID-${Date.now().toString().slice(-6)}`;
+      const application = normalizeApplication({
+        id,
+        applicationNumber: id,
         founder: String(data.name || ""),
+        founderId: String(data.email || ""),
         email: String(data.email || ""),
+        phone: String(data.phone || ""),
         startup: String(data.startup || ""),
+        startupName: String(data.startup || ""),
         period: program.period,
         sector: String(data.sector || "Belirtilmedi"),
         city: String(data.city || ""),
         stage: String(data.stage || program.requiredStages[0] || "Fikir"),
+        website: String(data.website || ""),
         teamSize: Number(data.teamSize || 1),
         score: 0,
+        juryScore: 0,
         status: "Yeni",
+        problem: String(data.problem || ""),
+        solution: String(data.solution || ""),
+        targetMarket: String(data.targetMarket || ""),
+        businessModel: String(data.businessModel || ""),
+        competitors: String(data.competitors || ""),
+        differentiation: String(data.differentiation || ""),
+        traction: String(data.traction || ""),
+        futureGoals: String(data.futureGoals || ""),
         submittedAt: new Date().toISOString().slice(0, 10),
-      };
+        updatedAt: new Date().toISOString(),
+      });
 
-      window.localStorage.setItem(
-        applicationsStorageKey,
-        JSON.stringify([application, ...applications]),
-      );
-      addActivity("Yeni başvuru alındı", application.startup);
-      window.dispatchEvent(new Event("lidea-applications-updated"));
+      writeApplications([application, ...applications]);
+      addAdminActivity("Yeni başvuru alındı", application.startup);
       setSent(true);
     }
   }
@@ -184,6 +138,7 @@ export default function Apply() {
               ["startup", "Girişim Adı"],
               ["sector", "Sektör"],
               ["city", "Şehir"],
+              ["website", "Web Sitesi"],
             ].map(([name, label]) => (
               <label className="font-bold" key={name}>
                 {label}
@@ -234,6 +189,23 @@ export default function Apply() {
                 className="mt-2 w-full rounded-2xl border border-cyan-700/20 bg-white/75 p-4 font-normal outline-none shadow-[0_0_20px_rgba(23,230,210,.08)] focus:border-[#00a6c8] focus:shadow-[0_0_24px_rgba(23,230,210,.28)]"
               />
             </label>
+            {[
+              ["targetMarket", "Hedef Kitle"],
+              ["businessModel", "İş Modeli"],
+              ["competitors", "Rakipler"],
+              ["differentiation", "Farklılaşma"],
+              ["traction", "Mevcut Traction"],
+              ["futureGoals", "Gelecek Hedefleri"],
+            ].map(([name, label]) => (
+              <label className="font-bold" key={name}>
+                {label}
+                <textarea
+                  name={name}
+                  rows={3}
+                  className="mt-2 w-full rounded-2xl border border-cyan-700/20 bg-white/75 p-4 font-normal outline-none shadow-[0_0_20px_rgba(23,230,210,.08)] focus:border-[#00a6c8] focus:shadow-[0_0_24px_rgba(23,230,210,.28)]"
+                />
+              </label>
+            ))}
             <button className="mt-3 rounded-full bg-[#063f46] p-4 font-bold text-white shadow-[0_0_26px_rgba(23,230,210,.45)]">
               Başvuruyu Tamamla →
             </button>

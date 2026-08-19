@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 type ApplicationStatus =
   | "Yeni"
   | "İnceleniyor"
+  | "Eksik Bilgi"
   | "Jüriye Gönderildi"
   | "Kabul"
   | "Yedek"
@@ -81,6 +82,7 @@ const menu = [
 const statuses: ApplicationStatus[] = [
   "Yeni",
   "İnceleniyor",
+  "Eksik Bilgi",
   "Jüriye Gönderildi",
   "Kabul",
   "Yedek",
@@ -388,6 +390,7 @@ export default function AdminPage() {
       total: applications.length,
       week: applications.filter((item) => isThisWeek(item.submittedAt)).length,
       review: count("İnceleniyor"),
+      missing: count("Eksik Bilgi"),
       jury: count("Jüriye Gönderildi"),
       accepted: count("Kabul"),
       waitlist: count("Yedek"),
@@ -475,10 +478,14 @@ export default function AdminPage() {
               <button
                 key={item}
                 onClick={() => {
-                  if (item === "Program") {
-                    window.location.href = "/admin/program";
-                    return;
-                  }
+              if (item === "Başvurular") {
+                window.location.href = "/admin/basvurular";
+                return;
+              }
+              if (item === "Program") {
+                window.location.href = "/admin/program";
+                return;
+              }
                   setActiveMenu(item);
                 }}
                 className={`rounded-md px-3 py-2.5 text-left text-sm font-semibold transition ${
@@ -585,8 +592,10 @@ export default function AdminPage() {
                         Son 5-10 başvurunun hızlı görünümü.
                       </p>
                     </div>
-                    <button
-                      onClick={() => setActiveMenu("Başvurular")}
+                  <button
+                    onClick={() => {
+                      window.location.href = "/admin/basvurular";
+                    }}
                       className="h-10 rounded-md bg-[#063f46] px-4 text-sm font-bold text-white"
                     >
                       Tüm Başvuruları Gör →
@@ -797,7 +806,7 @@ export default function AdminPage() {
                   <div className="mt-4 grid gap-3">
                     {[
                       ["Yeni Başvuru", "/basvuru"],
-                      ["Başvuruları İncele", "#applications"],
+                      ["Başvuruları İncele", "/admin/basvurular"],
                       ["Jüriye Ata", "/juri"],
                       ["Program Takvimini Yönet", "/admin/program"],
                     ].map(([label, href]) => (

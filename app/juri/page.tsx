@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { readApplications } from "@/lib/applications";
 
 type UserRole =
   | "Süper Admin"
@@ -145,13 +146,39 @@ function getUsers() {
 function getEvaluations() {
   if (typeof window === "undefined") return seedVentures;
   const raw = window.localStorage.getItem(evaluationsStorageKey);
-  if (!raw) return seedVentures;
+  let savedVentures: Venture[] = [];
 
   try {
-    return JSON.parse(raw) as Venture[];
+    savedVentures = raw ? (JSON.parse(raw) as Venture[]) : [];
   } catch {
-    return seedVentures;
+    savedVentures = [];
   }
+
+  const liveVentures = readApplications()
+    .filter((application) => application.juryAssignees.length > 0)
+    .map((application) => {
+      const existing = savedVentures.find((venture) => venture.id === application.id);
+      if (existing) return existing;
+
+      return {
+        id: application.id,
+        name: application.startup,
+        sector: application.sector,
+        city: application.city,
+        stage: application.stage,
+        assignedTo: application.juryAssignees,
+        scores: Object.fromEntries(criteria.map((criterion) => [criterion, 0])) as Record<Criterion, number>,
+        comment: "",
+        recommendation: "",
+      } satisfies Venture;
+    });
+
+  if (!raw) return liveVentures;
+
+  return [
+    ...liveVentures,
+    ...savedVentures.filter((venture) => !liveVentures.some((item) => item.id === venture.id)),
+  ];
 }
 
 export default function JuryPanel() {
