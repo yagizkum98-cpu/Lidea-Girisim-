@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ApplicationCta from "@/components/ApplicationCta";
 import Header from "@/components/Header";
 import TrainingCalendar from "@/components/TrainingCalendar";
 
@@ -64,12 +65,10 @@ export default function Home() {
               girişimcilik yolculuğunu bir sonraki aşamaya taşı.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
-              <Link
-                href="/basvuru"
+              <ApplicationCta
                 className="rounded-full bg-[#063f46] px-7 py-4 font-bold text-white shadow-[0_0_26px_rgba(23,230,210,.45)]"
-              >
-                Başvurunu Yap →
-              </Link>
+                openLabel="Başvurunu Yap →"
+              />
               <a
                 href="#hakkimizda"
                 className="rounded-full border border-cyan-700/25 bg-white/25 px-7 py-4 font-bold text-[#063f46]"
@@ -271,12 +270,9 @@ export default function Home() {
           <h2 className="max-w-3xl text-5xl font-black">
             Sıradaki girişim neden seninki olmasın?
           </h2>
-          <Link
-            href="/basvuru"
+          <ApplicationCta
             className="mt-8 inline-block rounded-full bg-[#052f36] px-7 py-4 font-bold text-white shadow-[0_0_22px_rgba(5,47,54,.28)]"
-          >
-            3. Döneme Başvur →
-          </Link>
+          />
         </div>
       </section>
     </main>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ApplicationCta from "@/components/ApplicationCta";
 
 export default function Header() {
   return (
@@ -20,12 +21,9 @@ export default function Header() {
           <Link href="/juri">Jüri</Link>
           <Link href="/admin">Admin</Link>
         </nav>
-        <Link
-          href="/basvuru"
+        <ApplicationCta
           className="rounded-full bg-[#063f46] px-5 py-3 text-sm font-bold text-white shadow-[0_0_24px_rgba(23,230,210,.42)]"
-        >
-          3. Döneme Başvur →
-        </Link>
+        />
       </div>
     </header>
   );

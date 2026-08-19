@@ -474,7 +474,13 @@ export default function AdminPage() {
             {menu.map((item) => (
               <button
                 key={item}
-                onClick={() => setActiveMenu(item)}
+                onClick={() => {
+                  if (item === "Program") {
+                    window.location.href = "/admin/program";
+                    return;
+                  }
+                  setActiveMenu(item);
+                }}
                 className={`rounded-md px-3 py-2.5 text-left text-sm font-semibold transition ${
                   activeMenu === item
                     ? "bg-[#063f46] text-white"
@@ -793,7 +799,7 @@ export default function AdminPage() {
                       ["Yeni Başvuru", "/basvuru"],
                       ["Başvuruları İncele", "#applications"],
                       ["Jüriye Ata", "/juri"],
-                      ["Program Takvimini Yönet", "#program"],
+                      ["Program Takvimini Yönet", "/admin/program"],
                     ].map(([label, href]) => (
                       <a
                         key={label}
