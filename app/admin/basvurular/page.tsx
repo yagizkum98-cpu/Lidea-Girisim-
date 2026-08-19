@@ -142,6 +142,9 @@ export default function ApplicationsPage() {
             <Link className="rounded-md px-3 py-2.5 text-slate-600 hover:bg-slate-100" href="/juri">
               ▣ Jüri
             </Link>
+            <Link className="rounded-md px-3 py-2.5 text-slate-600 hover:bg-slate-100" href="/admin/degerlendiriciler">
+              ▣ Değerlendiriciler
+            </Link>
             <Link className="rounded-md px-3 py-2.5 text-slate-600 hover:bg-slate-100" href="/admin/program">
               ▣ Program
             </Link>

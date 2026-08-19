@@ -73,6 +73,7 @@ const menu = [
   "Başvurular",
   "Girişimler",
   "Jüri",
+  "Değerlendiriciler",
   "Program",
   "Bildirimler",
   "Raporlar",
@@ -486,6 +487,10 @@ export default function AdminPage() {
                 window.location.href = "/admin/girisimler";
                 return;
               }
+              if (item === "Değerlendiriciler") {
+                window.location.href = "/admin/degerlendiriciler";
+                return;
+              }
               if (item === "Program") {
                 window.location.href = "/admin/program";
                 return;
@@ -811,7 +816,7 @@ export default function AdminPage() {
                     {[
                       ["Yeni Başvuru", "/basvuru"],
                       ["Başvuruları İncele", "/admin/basvurular"],
-                      ["Jüriye Ata", "/juri"],
+                      ["Jüriye Ata", "/admin/degerlendiriciler"],
                       ["Program Takvimini Yönet", "/admin/program"],
                     ].map(([label, href]) => (
                       <a

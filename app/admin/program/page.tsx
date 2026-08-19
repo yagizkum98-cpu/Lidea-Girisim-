@@ -286,9 +286,10 @@ export default function ProgramManagementPage() {
           <nav className="grid gap-1 p-3">
             {[
               ["Dashboard", "/admin"],
-              ["Başvurular", "/admin#applications"],
-              ["Girişimler", "/admin"],
+              ["Başvurular", "/admin/basvurular"],
+              ["Girişimler", "/admin/girisimler"],
               ["Jüri", "/juri"],
+              ["Değerlendiriciler", "/admin/degerlendiriciler"],
               ["Program", "/admin/program"],
               ["Bildirimler", "/admin"],
               ["Raporlar", "/admin"],

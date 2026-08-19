@@ -12,37 +12,23 @@ import {
   readApplications,
   saveApplication,
 } from "@/lib/applications";
+import { readEvaluators } from "@/lib/evaluators";
 import { readStartups, startupFromApplication, writeStartups } from "@/lib/startups";
-
-const usersStorageKey = "lidea-admin-users";
 
 const inputClass =
   "h-11 rounded-md border border-slate-200 bg-white px-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-cyan-600";
-
-function readEvaluators() {
-  const saved = window.localStorage.getItem(usersStorageKey);
-  if (!saved) return [];
-
-  try {
-    return (JSON.parse(saved) as { name: string; email: string; role: string }[]).filter((user) =>
-      ["Değerlendirme Yetkilisi", "Mentor", "Admin", "Süper Admin"].includes(user.role),
-    );
-  } catch {
-    return [];
-  }
-}
 
 export default function ApplicationDetailPage() {
   const params = useParams<{ id: string }>();
   const [application, setApplication] = useState<Application | null>(null);
   const [tab, setTab] = useState("Genel Bilgiler");
-  const [evaluators, setEvaluators] = useState<{ name: string; email: string; role: string }[]>([]);
+  const [evaluators, setEvaluators] = useState<{ name: string; email: string; status: string }[]>([]);
   const [notice, setNotice] = useState("");
 
   useEffect(() => {
     const applications = readApplications();
     setApplication(applications.find((item) => item.id === params.id) || null);
-    setEvaluators(readEvaluators());
+    setEvaluators(readEvaluators().filter((evaluator) => evaluator.status === "Aktif"));
   }, [params.id]);
 
   function persist(nextApplication: Application, message: string) {
@@ -342,7 +328,7 @@ export default function ApplicationDetailPage() {
                       type="checkbox"
                       defaultChecked={application.juryAssignees.includes(evaluator.email)}
                     />
-                    {evaluator.name} ({evaluator.role})
+                    {evaluator.name} ({evaluator.status})
                   </label>
                 ))
               ) : (
