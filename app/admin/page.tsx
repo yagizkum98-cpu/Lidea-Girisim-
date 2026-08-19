@@ -500,6 +500,10 @@ export default function AdminPage() {
                 window.location.href = "/admin/program";
                 return;
               }
+              if (item === "Bildirimler") {
+                window.location.href = "/admin/bildirimler";
+                return;
+              }
                   setActiveMenu(item);
                 }}
                 className={`rounded-md px-3 py-2.5 text-left text-sm font-semibold transition ${

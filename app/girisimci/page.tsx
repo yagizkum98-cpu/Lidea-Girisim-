@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { Notification as PlatformNotification, readNotificationsForUser } from "@/lib/notifications";
 
 type UserRole =
   | "Süper Admin"
@@ -25,19 +26,10 @@ type StartupProfile = {
   website: string;
 };
 
-type Announcement = {
-  id: string;
-  to: string;
-  title: string;
-  message: string;
-  createdAt: string;
-};
-
 const usersStorageKey = "lidea-admin-users";
 const entrepreneurSessionKey = "lidea-entrepreneur-session";
 const progressStorageKey = "lidea-entrepreneur-progress";
 const profileStorageKey = "lidea-entrepreneur-profile";
-const announcementsStorageKey = "lidea-announcements";
 
 const defaultProfile: StartupProfile = {
   name: "LideaCheck",
@@ -128,7 +120,7 @@ export default function EntrepreneurPanel() {
   const [progress, setProgress] = useState(45);
   const [profile, setProfile] = useState(defaultProfile);
   const [notice, setNotice] = useState("");
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [announcements, setAnnouncements] = useState<PlatformNotification[]>([]);
 
   useEffect(() => {
     const users = getUsers();
@@ -142,14 +134,21 @@ export default function EntrepreneurPanel() {
     setProgress(Number.isFinite(savedProgress) && savedProgress > 0 ? savedProgress : 45);
     setProfile(getProfile());
 
-    const savedAnnouncements = window.localStorage.getItem(announcementsStorageKey);
-    if (savedAnnouncements) {
-      try {
-        setAnnouncements(JSON.parse(savedAnnouncements) as Announcement[]);
-      } catch {
-        setAnnouncements([]);
-      }
-    }
+    if (sessionUser) setAnnouncements(readNotificationsForUser(sessionUser.email, sessionUser.role));
+    const syncNotifications = () => {
+      const email = window.localStorage.getItem(entrepreneurSessionKey);
+      const currentUser = users.find((user) => user.email === email);
+      if (currentUser) setAnnouncements(readNotificationsForUser(currentUser.email, currentUser.role));
+    };
+    window.addEventListener("storage", syncNotifications);
+    window.addEventListener("focus", syncNotifications);
+    window.addEventListener("lidea-notifications-updated", syncNotifications);
+
+    return () => {
+      window.removeEventListener("storage", syncNotifications);
+      window.removeEventListener("focus", syncNotifications);
+      window.removeEventListener("lidea-notifications-updated", syncNotifications);
+    };
   }, []);
 
   useEffect(() => {
@@ -164,8 +163,10 @@ export default function EntrepreneurPanel() {
 
   const myAnnouncements = useMemo(() => {
     if (!activeUser) return [];
-    return announcements.filter(
-      (announcement) => announcement.to.toLowerCase() === activeUser.email.toLowerCase(),
+    return announcements.filter((announcement) =>
+      announcement.recipients.some(
+        (recipient) => recipient.email.toLowerCase() === activeUser.email.toLowerCase(),
+      ),
     );
   }, [activeUser, announcements]);
 
@@ -186,6 +187,7 @@ export default function EntrepreneurPanel() {
 
     window.localStorage.setItem(entrepreneurSessionKey, user.email);
     setActiveUser(user);
+    setAnnouncements(readNotificationsForUser(user.email, user.role));
     setLoginError("");
   }
 

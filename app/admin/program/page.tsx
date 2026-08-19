@@ -292,7 +292,7 @@ export default function ProgramManagementPage() {
               ["Değerlendiriciler", "/admin/degerlendiriciler"],
               ["Mentorlar", "/admin/mentorlar"],
               ["Program", "/admin/program"],
-              ["Bildirimler", "/admin"],
+              ["Bildirimler", "/admin/bildirimler"],
               ["Raporlar", "/admin"],
               ["Ayarlar", "/admin"],
             ].map(([label, href]) => (
