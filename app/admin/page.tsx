@@ -29,7 +29,7 @@ type AdminUser = {
   name: string;
   email: string;
   password: string;
-  role: "Süper Admin" | "Program Yetkilisi" | "Değerlendirme Yetkilisi";
+  role: "Süper Admin" | "Program Yetkilisi" | "Değerlendirme Yetkilisi" | "Girişimci";
 };
 
 const storageKey = "lidea-admin-users";
@@ -631,6 +631,7 @@ export default function AdminPage() {
                     <select name="role" className={selectClass} defaultValue="Program Yetkilisi">
                       <option>Program Yetkilisi</option>
                       <option>Değerlendirme Yetkilisi</option>
+                      <option>Girişimci</option>
                       <option>Süper Admin</option>
                     </select>
                     <button className="h-11 rounded-md bg-cyan-700 px-4 text-sm font-bold text-white">

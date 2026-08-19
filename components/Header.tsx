@@ -16,6 +16,7 @@ export default function Header() {
           <a href="/#program">Program</a>
           <a href="/#surec">Süreç</a>
           <a href="/#sss">SSS</a>
+          <Link href="/girisimci">Girişimci</Link>
           <Link href="/admin">Admin</Link>
         </nav>
         <Link
