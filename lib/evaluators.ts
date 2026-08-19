@@ -24,13 +24,13 @@ export type EvaluatorAssignment = {
 };
 
 type AdminUser = {
-  id: string;
+  id?: string;
   name: string;
   email: string;
   password: string;
   role: string;
-  status: string;
-  createdAt: string;
+  status?: string;
+  createdAt?: string;
 };
 
 export const evaluatorsStorageKey = "lidea-evaluators";
@@ -93,13 +93,42 @@ export function normalizeEvaluator(raw: Partial<Evaluator> & Record<string, unkn
 export function readEvaluators() {
   if (typeof window === "undefined") return [];
   const saved = window.localStorage.getItem(evaluatorsStorageKey);
+  const evaluatorRoles = new Set(["Değerlendirme Yetkilisi", "Jüri"]);
+  const savedUsers = window.localStorage.getItem(adminUsersStorageKey);
+  let users: AdminUser[] = [];
+
+  try {
+    users = savedUsers ? (JSON.parse(savedUsers) as AdminUser[]) : [];
+  } catch {
+    users = [];
+  }
+
+  const userEvaluators = users
+    .filter((user) => evaluatorRoles.has(user.role))
+    .map((user) =>
+      normalizeEvaluator({
+        id: user.id || `EV-${user.email}`,
+        name: user.name,
+        email: user.email,
+        password: user.password,
+        status: user.status === "Pasif" ? "Pasif" : "Aktif",
+        createdAt: user.createdAt,
+      }),
+    );
+
   if (!saved) {
-    window.localStorage.setItem(evaluatorsStorageKey, JSON.stringify([]));
-    return [];
+    window.localStorage.setItem(evaluatorsStorageKey, JSON.stringify(userEvaluators));
+    return userEvaluators;
   }
 
   try {
-    const evaluators = (JSON.parse(saved) as Record<string, unknown>[]).map(normalizeEvaluator);
+    const storedEvaluators = (JSON.parse(saved) as Record<string, unknown>[]).map(normalizeEvaluator);
+    const mergedByEmail = new Map<string, Evaluator>();
+    userEvaluators.forEach((evaluator) => mergedByEmail.set(evaluator.email, evaluator));
+    storedEvaluators.forEach((evaluator) =>
+      mergedByEmail.set(evaluator.email, { ...mergedByEmail.get(evaluator.email), ...evaluator }),
+    );
+    const evaluators = Array.from(mergedByEmail.values());
     window.localStorage.setItem(evaluatorsStorageKey, JSON.stringify(evaluators));
     return evaluators;
   } catch {

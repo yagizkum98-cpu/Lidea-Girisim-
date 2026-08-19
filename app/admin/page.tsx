@@ -35,6 +35,7 @@ type AdminUser = {
     | "Admin"
     | "Program Yetkilisi"
     | "Değerlendirme Yetkilisi"
+    | "Jüri"
     | "Mentor"
     | "Girişimci";
 };
@@ -486,6 +487,10 @@ export default function AdminPage() {
               }
               if (item === "Girişimler") {
                 window.location.href = "/admin/girisimler";
+                return;
+              }
+              if (item === "Jüri") {
+                window.location.href = "/juri";
                 return;
               }
               if (item === "Değerlendiriciler") {
@@ -940,6 +945,7 @@ export default function AdminPage() {
                       <option>Admin</option>
                       <option>Program Yetkilisi</option>
                       <option>Değerlendirme Yetkilisi</option>
+                      <option>Jüri</option>
                       <option>Mentor</option>
                       <option>Girişimci</option>
                       <option>Süper Admin</option>

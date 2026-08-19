@@ -8,6 +8,7 @@ type UserRole =
   | "Admin"
   | "Program Yetkilisi"
   | "Değerlendirme Yetkilisi"
+  | "Jüri"
   | "Mentor"
   | "Girişimci";
 
@@ -49,6 +50,7 @@ const allowedRoles: UserRole[] = [
   "Admin",
   "Program Yetkilisi",
   "Değerlendirme Yetkilisi",
+  "Jüri",
   "Mentor",
 ];
 
@@ -184,8 +186,8 @@ function getEvaluations() {
 export default function JuryPanel() {
   const [activeUser, setActiveUser] = useState<PortalUser | null>(null);
   const [loginError, setLoginError] = useState("");
-  const [ventures, setVentures] = useState(seedVentures);
-  const [selectedId, setSelectedId] = useState(seedVentures[0].id);
+  const [ventures, setVentures] = useState<Venture[]>([]);
+  const [selectedId, setSelectedId] = useState("");
 
   useEffect(() => {
     const users = getUsers();
