@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   Startup,
   StartupStatus,
+  getStartupProfileCompletion,
   normalizeStartup,
   readStartups,
   startupStatuses,
@@ -240,7 +241,7 @@ export default function StartupsPage() {
                       <td className="px-5 py-4">{startup.sector}</td>
                       <td className="px-5 py-4">{startup.stage}</td>
                       <td className="px-5 py-4 font-black text-green-700">● {startup.status}</td>
-                      <td className="px-5 py-4">%{startup.progress}</td>
+                      <td className="px-5 py-4">%{getStartupProfileCompletion(startup).percent}</td>
                       <td className="px-5 py-4">
                         <Link className="font-black text-cyan-800" href={`/admin/girisimler/${startup.id}`}>
                           İncele →

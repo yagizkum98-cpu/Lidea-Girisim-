@@ -83,6 +83,19 @@ export const demoDayItems = [
   "Final Pitch",
 ];
 
+const profileCompletionChecks = [
+  { key: "logo", label: "Logo" },
+  { key: "name", label: "Temel Bilgiler" },
+  { key: "sector", label: "Sektör" },
+  { key: "stage", label: "Aşama" },
+  { key: "website", label: "Web Sitesi" },
+  { key: "problem", label: "Problem" },
+  { key: "solution", label: "Çözüm" },
+  { key: "businessModel", label: "İş Modeli" },
+  { key: "traction", label: "Traction" },
+  { key: "members", label: "Ekip" },
+] as const;
+
 function slugify(value: string) {
   return value
     .toLowerCase()
@@ -115,7 +128,7 @@ export function startupFromApplication(application: Application) {
     businessModel: application.businessModel,
     traction: application.traction,
     status: "Aktif",
-    progress: 15,
+    progress: 0,
     acceptedAt: new Date().toISOString().slice(0, 10),
     members: [
       {
@@ -139,6 +152,23 @@ export function startupFromApplication(application: Application) {
     createdAt: now,
     updatedAt: now,
   } satisfies Startup;
+}
+
+export function getStartupProfileCompletion(startup: Startup | null) {
+  const items = profileCompletionChecks.map((item) => {
+    if (!startup) return { label: item.label, completed: false };
+    const value = startup[item.key];
+    const completed = Array.isArray(value) ? value.length > 0 : String(value || "").trim().length > 0;
+    return { label: item.label, completed };
+  });
+  const completedCount = items.filter((item) => item.completed).length;
+
+  return {
+    percent: items.length ? Math.round((completedCount / items.length) * 100) : 0,
+    completedCount,
+    totalCount: items.length,
+    items,
+  };
 }
 
 export function normalizeStartup(raw: Partial<Startup> & Record<string, unknown>) {

@@ -33,7 +33,7 @@ export async function acceptApplication(applicationId: string, adminUserId?: str
         problem: application.problem,
         solution: application.solution,
         businessModel: application.businessModel,
-        progress: 15,
+        progress: 0,
       },
     });
 

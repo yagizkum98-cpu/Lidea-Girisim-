@@ -17,9 +17,9 @@ export default function Header() {
           <a href="/#program">Program</a>
           <a href="/#surec">Süreç</a>
           <a href="/#sss">SSS</a>
-          <Link href="/girisimci">Girişimci</Link>
-          <Link href="/juri">Jüri</Link>
-          <Link href="/admin">Admin</Link>
+          <Link href="/girisimci" className="sr-only">Girişimci paneli</Link>
+          <Link href="/juri" className="sr-only">Jüri paneli</Link>
+          <Link href="/admin" className="sr-only">Admin paneli</Link>
         </nav>
         <ApplicationCta
           className="rounded-full bg-[#063f46] px-5 py-3 text-sm font-bold text-white shadow-[0_0_24px_rgba(23,230,210,.42)]"

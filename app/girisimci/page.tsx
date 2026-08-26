@@ -1,19 +1,31 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Application } from "@/lib/applications";
+import {
+  Application,
+  getApplicationProcess,
+  getApplicationSubmissionCompletion,
+} from "@/lib/applications";
 import {
   EntrepreneurWorkspace,
   createManualStartupForEntrepreneur,
-  defaultJourney,
   findEntrepreneurApplication,
   findEntrepreneurStartup,
+  getProgramProgress,
   readEntrepreneurMeetings,
   readEntrepreneurWorkspace,
+  readProgramStages,
   saveEntrepreneurWorkspace,
+  ProgramStage,
 } from "@/lib/entrepreneur";
+import {
+  MentorAction,
+  getMentorActionsForStartup,
+  getMentoringMetrics,
+  saveMentorAction,
+} from "@/lib/mentors";
 import { Notification as PlatformNotification, readNotificationsForUser } from "@/lib/notifications";
-import { Startup, saveStartup } from "@/lib/startups";
+import { Startup, getStartupProfileCompletion, saveStartup } from "@/lib/startups";
 
 type UserRole =
   | "Süper Admin"
@@ -77,15 +89,20 @@ export default function EntrepreneurPanel() {
   const [application, setApplication] = useState<Application | null>(null);
   const [startup, setStartup] = useState<Startup | null>(null);
   const [workspace, setWorkspace] = useState<EntrepreneurWorkspace | null>(null);
+  const [programStages, setProgramStages] = useState<ProgramStage[]>([]);
   const [notifications, setNotifications] = useState<PlatformNotification[]>([]);
+  const [mentorActions, setMentorActions] = useState<MentorAction[]>([]);
   const [activeMenu, setActiveMenu] = useState("Dashboard");
   const [loginError, setLoginError] = useState("");
   const [notice, setNotice] = useState("");
 
   function syncForUser(user: PortalUser) {
+    const currentStartup = findEntrepreneurStartup(user.email);
     setApplication(findEntrepreneurApplication(user.email));
-    setStartup(findEntrepreneurStartup(user.email));
+    setStartup(currentStartup);
     setWorkspace(readEntrepreneurWorkspace(user.email));
+    setProgramStages(readProgramStages());
+    setMentorActions(getMentorActionsForStartup(currentStartup));
     setNotifications(readNotificationsForUser(user.email, user.role));
   }
 
@@ -108,16 +125,33 @@ export default function EntrepreneurPanel() {
       "lidea-applications-updated",
       "lidea-startups-updated",
       "lidea-entrepreneur-workspaces-updated",
+      "lidea-program-updated",
       "lidea-notifications-updated",
       "lidea-mentor-meetings-updated",
+      "lidea-mentor-actions-updated",
     ];
     events.forEach((event) => window.addEventListener(event, sync));
     return () => events.forEach((event) => window.removeEventListener(event, sync));
   }, []);
 
   const meetings = useMemo(() => readEntrepreneurMeetings(startup), [startup]);
-  const progress = startup?.progress ?? workspace?.progress ?? 0;
-  const completedSteps = Math.round((progress / 100) * defaultJourney.length);
+  const profileCompletion = useMemo(() => getStartupProfileCompletion(startup), [startup]);
+  const progress = startup ? profileCompletion.percent : (workspace?.progress ?? 0);
+  const applicationCompletion = useMemo(
+    () => getApplicationSubmissionCompletion(application),
+    [application],
+  );
+  const applicationProcess = useMemo(() => getApplicationProcess(application), [application]);
+  const programProgress = useMemo(() => getProgramProgress(workspace), [workspace]);
+  const currentProgramStage =
+    programStages.find((stage) => stage.active) || programStages[0] || null;
+  const mentoringMetrics = useMemo(
+    () => getMentoringMetrics(startup, meetings, mentorActions),
+    [meetings, mentorActions, startup],
+  );
+  const nextMentorMeeting = meetings
+    .filter((meeting) => meeting.status === "Planlandı")
+    .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`))[0];
   const nextMeeting = meetings.find((meeting) => meeting.status === "Planlandı");
   const unreadCount = notifications.reduce(
     (sum, notification) =>
@@ -163,15 +197,6 @@ export default function EntrepreneurPanel() {
     setNotice(message);
   }
 
-  function updateProgress(value: number) {
-    if (startup) {
-      const nextStartup = { ...startup, progress: value, updatedAt: new Date().toISOString() };
-      saveStartup(nextStartup);
-      setStartup(nextStartup);
-    }
-    if (workspace) saveWorkspace({ ...workspace, progress: value }, "Program ilerlemesi güncellendi.");
-  }
-
   function saveStartupProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!startup) return;
@@ -189,8 +214,12 @@ export default function EntrepreneurPanel() {
       traction: String(form.get("traction") || ""),
       updatedAt: new Date().toISOString(),
     };
-    saveStartup(nextStartup);
-    setStartup(nextStartup);
+    const completedStartup = {
+      ...nextStartup,
+      progress: getStartupProfileCompletion(nextStartup).percent,
+    };
+    saveStartup(completedStartup);
+    setStartup(completedStartup);
     setNotice("Girişim profili kaydedildi.");
   }
 
@@ -222,7 +251,7 @@ export default function EntrepreneurPanel() {
             id: crypto.randomUUID(),
             title: String(form.get("title") || ""),
             dueDate: String(form.get("dueDate") || ""),
-            status: "Bekliyor",
+            status: String(form.get("status") || "Bekliyor") as EntrepreneurWorkspace["tasks"][number]["status"],
             progress: "0/1",
           },
           ...workspace.tasks,
@@ -231,6 +260,25 @@ export default function EntrepreneurPanel() {
       "Görev eklendi.",
     );
     event.currentTarget.reset();
+  }
+
+  function updateTaskStatus(taskId: string, status: EntrepreneurWorkspace["tasks"][number]["status"]) {
+    if (!workspace) return;
+    saveWorkspace(
+      {
+        ...workspace,
+        tasks: workspace.tasks.map((task) =>
+          task.id === taskId
+            ? {
+                ...task,
+                status,
+                progress: status === "Tamamlandı" ? "1/1" : "0/1",
+              }
+            : task,
+        ),
+      },
+      "Görev durumu güncellendi.",
+    );
   }
 
   function addDocument(event: FormEvent<HTMLFormElement>) {
@@ -254,6 +302,20 @@ export default function EntrepreneurPanel() {
       "Belge kaydı eklendi.",
     );
     event.currentTarget.reset();
+  }
+
+  function completeMentorAction(action: MentorAction) {
+    const updatedAction = {
+      ...action,
+      status: "Tamamlandı" as const,
+      updatedAt: new Date().toISOString(),
+      completedAt: new Date().toISOString(),
+    };
+    saveMentorAction(updatedAction);
+    setMentorActions((actions) =>
+      actions.map((item) => (item.id === action.id ? updatedAction : item)),
+    );
+    setNotice("Mentor aksiyonu tamamlandı.");
   }
 
   if (!activeUser) {
@@ -342,22 +404,21 @@ export default function EntrepreneurPanel() {
             <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-5">
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-[.18em] text-cyan-700">Program İlerlemesi</p>
+                  <p className="text-sm font-bold uppercase tracking-[.18em] text-cyan-700">Profil Tamamlama</p>
                   <h2 className="mt-2 text-5xl font-black">%{progress}</h2>
                 </div>
-                <div className="flex items-center gap-3">
-                  <input aria-label="Program ilerleme yüzdesi" type="range" min="0" max="100" value={progress} onChange={(event) => updateProgress(Number(event.target.value))} className="w-52 accent-cyan-700" />
-                  <button onClick={() => updateProgress(0)} className="h-10 rounded-md border border-slate-200 bg-white px-4 text-sm font-bold">Sıfırla</button>
+                <div className="rounded-md bg-slate-50 px-4 py-3 text-sm font-black text-slate-600">
+                  {profileCompletion.completedCount} / {profileCompletion.totalCount} alan dolu
                 </div>
               </div>
               <div className="mt-6 h-3 overflow-hidden rounded-full bg-slate-100">
                 <div className="h-full rounded-full bg-gradient-to-r from-[#063f46] via-cyan-600 to-[#8ad66f] transition-all" style={{ width: `${progress}%` }} />
               </div>
-              <div className="mt-6 grid gap-3 md:grid-cols-7">
-                {defaultJourney.map((step, index) => (
-                  <div key={step} className={`rounded-md border p-4 ${index < completedSteps && progress > 0 ? "border-cyan-200 bg-cyan-50 text-cyan-950" : "border-slate-200 bg-slate-50 text-slate-500"}`}>
-                    <p className="text-xl font-black">{index < completedSteps && progress > 0 ? "✓" : index + 1}</p>
-                    <p className="mt-2 text-sm font-bold">{step}</p>
+              <div className="mt-6 grid gap-3 md:grid-cols-5">
+                {profileCompletion.items.map((item, index) => (
+                  <div key={item.label} className={`rounded-md border p-4 ${item.completed ? "border-cyan-200 bg-cyan-50 text-cyan-950" : "border-slate-200 bg-slate-50 text-slate-500"}`}>
+                    <p className="text-xl font-black">{item.completed ? "✓" : index + 1}</p>
+                    <p className="mt-2 text-sm font-bold">{item.label}</p>
                   </div>
                 ))}
               </div>
@@ -394,6 +455,35 @@ export default function EntrepreneurPanel() {
                 <section className="grid gap-6 lg:grid-cols-2">
                   <article className="rounded-lg border border-slate-200 bg-white p-6">
                     <h2 className="text-xl font-black">Başvurum</h2>
+                    <div className="mt-5 rounded-md bg-[#063f46] p-4 text-white">
+                      <p className="text-sm font-bold text-white/70">Başvuru Durumu</p>
+                      <p className="mt-2 text-2xl font-black">{applicationProcess.statusLabel}</p>
+                      <p className="mt-2 text-sm leading-6 text-white/75">{applicationProcess.description}</p>
+                    </div>
+                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                      {[
+                        [applicationCompletion.percent, "Başvuru Doluluğu", `${applicationCompletion.completedCount} / ${applicationCompletion.totalCount} alan dolu`],
+                        [applicationProcess.percent, "Süreç İlerlemesi", application?.updatedAt?.slice(0, 10) || "Henüz güncelleme yok"],
+                      ].map(([value, label, sub]) => (
+                        <div key={label} className="rounded-md bg-slate-50 p-4">
+                          <p className="text-3xl font-black">%{value}</p>
+                          <p className="mt-1 text-xs font-bold uppercase tracking-[.12em] text-slate-500">{label}</p>
+                          <p className="mt-2 text-xs font-semibold text-cyan-800">{sub}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100">
+                      <div className="h-full rounded-full bg-cyan-700 transition-all" style={{ width: `${applicationProcess.percent}%` }} />
+                    </div>
+                    <div className="mt-5 grid gap-2">
+                      {applicationProcess.steps.map((step, index) => (
+                        <div key={step.label} className="grid grid-cols-[36px_1fr_auto] items-center gap-3 rounded-md bg-slate-50 p-3 text-sm">
+                          <span className="font-black text-cyan-800">{String(index + 1).padStart(2, "0")}</span>
+                          <span className="font-bold">{step.label}</span>
+                          <span className="text-xs font-black text-slate-500">{step.state}</span>
+                        </div>
+                      ))}
+                    </div>
                     <div className="mt-5 space-y-3">
                       {[
                         ["Başvuru No", application?.applicationNumber || "-"],
@@ -411,12 +501,67 @@ export default function EntrepreneurPanel() {
 
                   <article className="rounded-lg border border-slate-200 bg-white p-6">
                     <h2 className="text-xl font-black">Programım</h2>
+                    <div className="mt-5 rounded-md bg-[#063f46] p-4 text-white">
+                      <p className="text-sm font-bold text-white/70">Program İlerlemesi</p>
+                      <p className="mt-2 text-4xl font-black">%{programProgress.percent}</p>
+                      <p className="mt-2 text-sm text-white/75">
+                        {programProgress.completedTasks} / {programProgress.totalTasks} görev tamamlandı
+                      </p>
+                    </div>
+                    <div className="mt-4 h-3 overflow-hidden rounded-full bg-slate-100">
+                      <div className="h-full rounded-full bg-cyan-700 transition-all" style={{ width: `${programProgress.percent}%` }} />
+                    </div>
+                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-md bg-slate-50 p-4">
+                        <p className="text-xs font-bold uppercase tracking-[.12em] text-slate-500">Şu Anki Aşama</p>
+                        <p className="mt-2 font-black">{currentProgramStage?.title || "Aşama tanımlanmadı"}</p>
+                        <p className="mt-1 text-xs text-slate-500">{currentProgramStage?.endDate || "Tarih yok"}</p>
+                      </div>
+                      <div className="rounded-md bg-slate-50 p-4">
+                        <p className="text-xs font-bold uppercase tracking-[.12em] text-slate-500">Sıradaki Adım</p>
+                        <p className="mt-2 font-black">{programProgress.nextTask?.title || "Görev yok"}</p>
+                        <p className="mt-1 text-xs text-slate-500">{programProgress.nextTask?.dueDate || "Tarih yok"}</p>
+                      </div>
+                    </div>
+                    {programProgress.overdueTasks.length ? (
+                      <p className="mt-4 rounded-md border border-orange-200 bg-orange-50 p-3 text-sm font-black text-orange-800">
+                        {programProgress.overdueTasks.length} geciken görev var.
+                      </p>
+                    ) : null}
+                    <div className="mt-5 grid gap-2">
+                      {programStages.length ? (
+                        programStages.map((stage, index) => (
+                          <div key={stage.id} className="grid grid-cols-[36px_1fr_auto] items-center gap-3 rounded-md bg-slate-50 p-3 text-sm">
+                            <span className="font-black text-cyan-800">{String(index + 1).padStart(2, "0")}</span>
+                            <span className="font-bold">{stage.title}</span>
+                            <span className="text-xs font-black text-slate-500">{stage.active ? "Aktif" : "Pasif"}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="rounded-md bg-slate-50 p-4 text-sm text-slate-500">Henüz canlı program aşaması yok.</p>
+                      )}
+                    </div>
                     <div className="mt-5 space-y-3">
                       {workspace?.tasks.length ? (
                         workspace.tasks.map((task) => (
                           <div key={task.id} className="rounded-md bg-slate-50 p-4">
-                            <p className="text-sm font-black">{task.title}</p>
-                            <p className="mt-1 text-xs text-slate-500">{task.status} / {task.dueDate || "Tarih yok"}</p>
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                              <div>
+                                <p className="text-sm font-black">{task.title}</p>
+                                <p className="mt-1 text-xs text-slate-500">{task.dueDate || "Tarih yok"}</p>
+                              </div>
+                              <select
+                                className={inputClass}
+                                value={task.status}
+                                onChange={(event) =>
+                                  updateTaskStatus(task.id, event.target.value as EntrepreneurWorkspace["tasks"][number]["status"])
+                                }
+                              >
+                                <option>Bekliyor</option>
+                                <option>Devam Ediyor</option>
+                                <option>Tamamlandı</option>
+                              </select>
+                            </div>
                           </div>
                         ))
                       ) : (
@@ -426,6 +571,11 @@ export default function EntrepreneurPanel() {
                     <form onSubmit={addTask} className="mt-4 grid gap-3">
                       <input name="title" className={inputClass} placeholder="Görev başlığı" />
                       <input name="dueDate" type="date" className={inputClass} />
+                      <select name="status" className={inputClass} defaultValue="Bekliyor">
+                        <option>Bekliyor</option>
+                        <option>Devam Ediyor</option>
+                        <option>Tamamlandı</option>
+                      </select>
                       <button className="h-11 rounded-md bg-cyan-700 px-4 text-sm font-bold text-white">Görev Ekle</button>
                     </form>
                   </article>
@@ -435,13 +585,84 @@ export default function EntrepreneurPanel() {
               <aside className="space-y-6">
                 <section className="rounded-lg border border-slate-200 bg-white p-5">
                   <h2 className="text-lg font-black">Mentorluk</h2>
-                  <div className="mt-4 rounded-md bg-[#063f46] p-4 text-white">
-                    <p className="text-sm font-bold">Mentorum</p>
-                    <p className="mt-2 text-xl font-black">{startup?.mentor?.mentorName || "Atanmadı"}</p>
-                    <p className="mt-1 text-sm text-white/70">
-                      {nextMeeting ? `${nextMeeting.date} ${nextMeeting.time} / ${nextMeeting.topic}` : "Planlı görüşme yok"}
-                    </p>
-                  </div>
+                  {startup?.mentor ? (
+                    <>
+                      <div className="mt-4 rounded-md bg-[#063f46] p-4 text-white">
+                        <p className="text-sm font-bold text-white/70">Ana Mentorum</p>
+                        <p className="mt-2 text-xl font-black">{startup.mentor.mentorName}</p>
+                        <p className="mt-1 text-sm text-white/70">
+                          {startup.mentor.expertise || "Mentorluk alanı girilmedi"}
+                        </p>
+                      </div>
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                        {[
+                          [
+                            mentoringMetrics.meetingPercent,
+                            "Görüşme",
+                            `${mentoringMetrics.completedMeetings} / ${mentoringMetrics.targetMeetings || 0}`,
+                          ],
+                          [
+                            mentoringMetrics.actionPercent,
+                            "Aksiyon",
+                            `${mentoringMetrics.completedActions} / ${mentoringMetrics.totalActions}`,
+                          ],
+                        ].map(([value, label, sub]) => (
+                          <div key={label} className="rounded-md bg-slate-50 p-4">
+                            <p className="text-2xl font-black">%{value}</p>
+                            <p className="mt-1 text-xs font-bold uppercase tracking-[.12em] text-slate-500">{label}</p>
+                            <p className="mt-2 text-xs font-black text-cyan-800">{sub}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+                        <div className="h-full rounded-full bg-cyan-700 transition-all" style={{ width: `${mentoringMetrics.meetingPercent}%` }} />
+                      </div>
+                      <div className="mt-4 rounded-md bg-slate-50 p-4">
+                        <p className="text-xs font-bold uppercase tracking-[.12em] text-slate-500">Sonraki Görüşme</p>
+                        <p className="mt-2 font-black">
+                          {nextMentorMeeting ? nextMentorMeeting.topic || "Konu girilmedi" : "Planlı görüşme yok"}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          {nextMentorMeeting ? `${nextMentorMeeting.date} ${nextMentorMeeting.time}` : "Mentor görüşme eklediğinde görünür."}
+                        </p>
+                      </div>
+                      {mentoringMetrics.overdueActions.length ? (
+                        <p className="mt-4 rounded-md border border-orange-200 bg-orange-50 p-3 text-sm font-black text-orange-800">
+                          {mentoringMetrics.overdueActions.length} geciken mentor aksiyonu var.
+                        </p>
+                      ) : null}
+                      <div className="mt-4 space-y-2">
+                        {mentorActions.length ? (
+                          mentorActions.map((action) => (
+                            <div key={action.id} className="rounded-md bg-slate-50 p-3 text-sm">
+                              <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div>
+                                  <p className="font-black">{action.title || "Mentor aksiyonu"}</p>
+                                  <p className="mt-1 text-xs text-slate-500">{action.deadline || "Tarih yok"} / {action.status}</p>
+                                </div>
+                                {action.status !== "Tamamlandı" ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => completeMentorAction(action)}
+                                    className="h-9 rounded-md bg-cyan-700 px-3 text-xs font-black text-white"
+                                  >
+                                    Tamamla
+                                  </button>
+                                ) : null}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="rounded-md bg-slate-50 p-3 text-sm text-slate-500">Henüz canlı mentor aksiyonu yok.</p>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="mt-4 rounded-md bg-slate-50 p-4">
+                      <p className="text-sm font-black">Mentor eşleştirmesi bekleniyor</p>
+                      <p className="mt-2 text-sm text-slate-500">Mentor ataması yapılınca görüşme ve aksiyon sayaçları canlı olarak artar.</p>
+                    </div>
+                  )}
                 </section>
 
                 <section className="rounded-lg border border-slate-200 bg-white p-5">

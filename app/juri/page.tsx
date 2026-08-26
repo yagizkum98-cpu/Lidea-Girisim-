@@ -72,63 +72,8 @@ const criteria: Criterion[] = [
   "Ekip",
 ];
 
-const seedVentures: Venture[] = [
-  {
-    id: "EVL-001",
-    name: "DijiCity",
-    sector: "Akıllı Şehir",
-    city: "Muğla",
-    stage: "MVP",
-    assignedTo: ["admin@lideagirisim.com", "mentor@lideagirisim.com"],
-    scores: {
-      Problem: 8,
-      Çözüm: 9,
-      Yenilikçilik: 8,
-      "Pazar Potansiyeli": 9,
-      Ölçeklenebilirlik: 9,
-      Ekip: 8,
-    },
-    comment:
-      "Problem net tanımlanmış, çözüm belediye ve kampüs ölçeğinde hızlı pilotlanabilir görünüyor.",
-    recommendation: "Kabul Öner",
-  },
-  {
-    id: "EVL-002",
-    name: "AgroLink",
-    sector: "Tarım Teknolojileri",
-    city: "İzmir",
-    stage: "Prototip",
-    assignedTo: ["admin@lideagirisim.com"],
-    scores: {
-      Problem: 7,
-      Çözüm: 8,
-      Yenilikçilik: 7,
-      "Pazar Potansiyeli": 8,
-      Ölçeklenebilirlik: 7,
-      Ekip: 8,
-    },
-    comment: "Saha erişimi güçlü, gelir modeli biraz daha keskinleştirilmeli.",
-    recommendation: "Yedek Öner",
-  },
-  {
-    id: "EVL-003",
-    name: "EduPulse",
-    sector: "Eğitim",
-    city: "İstanbul",
-    stage: "İlk müşteriler",
-    assignedTo: ["degerlendirici@lideagirisim.com"],
-    scores: {
-      Problem: 9,
-      Çözüm: 8,
-      Yenilikçilik: 8,
-      "Pazar Potansiyeli": 9,
-      Ölçeklenebilirlik: 8,
-      Ekip: 9,
-    },
-    comment: "İlk müşteri doğrulaması olumlu, büyüme hipotezleri takip edilmeli.",
-    recommendation: "",
-  },
-];
+const seedVentures: Venture[] = [];
+const demoEvaluationIds = new Set(["EVL-001", "EVL-002", "EVL-003"]);
 
 const inputClass =
   "h-11 rounded-md border border-slate-200 bg-white px-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-cyan-600";
@@ -151,9 +96,15 @@ function getEvaluations() {
   let savedVentures: Venture[] = [];
 
   try {
-    savedVentures = raw ? (JSON.parse(raw) as Venture[]) : [];
+    savedVentures = raw
+      ? (JSON.parse(raw) as Venture[]).filter((venture) => !demoEvaluationIds.has(venture.id))
+      : [];
   } catch {
     savedVentures = [];
+  }
+
+  if (raw) {
+    window.localStorage.setItem(evaluationsStorageKey, JSON.stringify(savedVentures));
   }
 
   const liveVentures = readApplications()

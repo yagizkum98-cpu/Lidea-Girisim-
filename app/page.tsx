@@ -1,6 +1,7 @@
 import Link from "next/link";
 import ApplicationCta from "@/components/ApplicationCta";
 import Header from "@/components/Header";
+import LideaCheckPublicAnnouncements from "@/components/LideaCheckPublicAnnouncements";
 import TrainingCalendar from "@/components/TrainingCalendar";
 
 const boardMembers = [
@@ -32,6 +33,44 @@ const benefits = [
   "Networking",
   "Eğitimler",
   "Demo Day",
+];
+
+const pressCards = [
+  {
+    source: "Demirören Haber Ajansı (DHA)",
+    title: "Fethiye'nin ücretsiz girişimcilik programı tanıtıldı",
+    description:
+      "Programın ilk döneminde 50'den fazla başvuru alındığı, 26 girişimin ön kuluçkaya ve 14 girişimin kuluçkaya kabul edildiği aktarıldı.",
+    href: "https://www.dha.com.tr/ekonomi/fethiyenin-ucretsiz-girisimcilik-programi-tanitildi-2542479",
+  },
+  {
+    source: "Demirören Haber Ajansı (DHA)",
+    title: "Fethiye'de LİDEA Demo Day etkinliği gerçekleşti",
+    description:
+      "LIDEA Demo Day'in girişimcileri yatırımcılar, jüri üyeleri ve ekosistem temsilcileriyle buluşturduğu aktarıldı.",
+    href: "https://www.dha.com.tr/kurumsal/fethiyede-lidea-girisimcilik-programi-demo-day-etkinligi-gerceklesti-2623881",
+  },
+  {
+    source: "eGirişim",
+    title: "Fethiye bölgesinin ilk girişimcilik programı: LİDEA",
+    description:
+      "24 haftalık programın ardından 15 girişimin yatırımcı ve jüri karşısına çıktığı haberleştirildi.",
+    href: "https://egirisim.com/2025/04/21/fethiye-bolgesinin-ilk-girisimcilik-programi-lidea/",
+  },
+  {
+    source: "Fethiye TV",
+    title: "Lidea Girişimcilik Programı'nda Demo Day heyecanı",
+    description:
+      "15 girişimcinin projelerini yatırımcılar ve jüri önünde sunduğu Demo Day yerel basına yansıdı.",
+    href: "https://www.fethiyetv.com/lidea-girisimcilik-programinda-demoday-heyecani",
+  },
+  {
+    source: "İstanbul Arel Üniversitesi - ArtıArel",
+    title: "Fethiye'den yükselen yenilik dalgası",
+    description:
+      "LIDEA, Fethiye'den yükselen girişimcilik ve yenilik hareketi olarak ele alındı; Agritech, yapay zeka, sürdürülebilirlik, turizm ve sağlık teknolojileri alanlarındaki girişimlere dikkat çekildi.",
+    href: "https://arti.arel.edu.tr/fethiyeden-yukselen-yenilik-dalgasi-lidea-girisim-programindaydik/",
+  },
 ];
 
 const steps = [
@@ -75,6 +114,12 @@ export default function Home() {
               >
                 Hakkımızda
               </a>
+              <Link
+                href="/lideacheck"
+                className="rounded-full border border-[#00a6c8]/35 bg-white/55 px-7 py-4 font-bold text-[#063f46] shadow-[0_0_22px_rgba(0,166,200,.18)]"
+              >
+                LideaCheck →
+              </Link>
             </div>
           </div>
           <div
@@ -162,15 +207,16 @@ export default function Home() {
         </div>
       </section>
 
+      <LideaCheckPublicAnnouncements />
+
       <section id="hakkimizda" className="mx-auto max-w-7xl px-6 py-24">
         <p className="font-bold text-[#0b7f5a]">HAKKIMIZDA</p>
         <div className="mt-3 grid gap-8 lg:grid-cols-[.82fr_1.18fr] lg:items-end">
           <h2 className="text-5xl font-black tracking-tight">
-            Lidea, girişim fikrini sahaya taşıyan yalın gelişim programıdır.
+            LIDEA, girişimcilerin fikirlerini geliştirmelerine ve işlerini büyütmelerine destek olan bir girişimcilik programıdır.
           </h2>
           <p className="text-lg leading-8 text-[#052f36]/65">
-            Fethiye'nin mavi-yeşil enerjisinden ilham alan program; fikir, ekip,
-            ürün ve pazar doğrulama adımlarını mentor desteğiyle bir araya getirir.
+            LIDEA Girişim Programı, girişimcilere fikirlerini geliştirme, iş modellerini oluşturma ve girişimlerini büyütme süreçlerinde destek sağlar.
           </p>
         </div>
 
@@ -206,6 +252,52 @@ export default function Home() {
               </article>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section id="basinda-lidea" className="mx-auto max-w-7xl px-6 py-24">
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="font-bold text-[#0b7f5a]">BASINDA LIDEA</p>
+            <h2 className="mt-3 max-w-3xl text-5xl font-black tracking-tight">
+              Basında LIDEA
+            </h2>
+            <p className="mt-5 max-w-3xl text-lg leading-8 text-[#052f36]/65">
+              LIDEA Girişim Programı, Fethiye'de girişimcilik ekosisteminin gelişimine yönelik çalışmaları, lansmanları ve Demo Day etkinlikleriyle ulusal ve yerel basında yer aldı.
+            </p>
+          </div>
+          <a
+            href="https://www.google.com/search?q=LIDEA+Giri%C5%9Fim+Program%C4%B1+bas%C4%B1nda"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex shrink-0 items-center justify-center rounded-full bg-[#063f46] px-6 py-3 font-bold text-white shadow-[0_0_22px_rgba(23,230,210,.32)]"
+          >
+            Haberleri Keşfet
+          </a>
+        </div>
+
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          {pressCards.map((item) => (
+            <article className="card flex min-h-[280px] flex-col p-7" key={item.href}>
+              <p className="text-sm font-black uppercase text-[#0b7f5a]">
+                {item.source}
+              </p>
+              <h3 className="mt-5 text-2xl font-black leading-tight">
+                {item.title}
+              </h3>
+              <p className="mt-4 flex-1 leading-7 text-[#052f36]/62">
+                {item.description}
+              </p>
+              <a
+                href={item.href}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-7 inline-flex font-black text-[#00a6c8]"
+              >
+                Haberi Görüntüle →
+              </a>
+            </article>
+          ))}
         </div>
       </section>
 

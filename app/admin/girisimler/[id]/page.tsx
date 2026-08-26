@@ -7,6 +7,7 @@ import {
   Startup,
   StartupStatus,
   demoDayItems,
+  getStartupProfileCompletion,
   saveStartup,
   startupStatuses,
   syncAcceptedApplicationsToStartups,
@@ -40,18 +41,22 @@ export default function StartupDetailPage() {
     event.preventDefault();
     if (!startup) return;
     const form = new FormData(event.currentTarget);
+    const nextStartup = {
+      ...startup,
+      name: String(form.get("name") || ""),
+      founder: String(form.get("founder") || ""),
+      sector: String(form.get("sector") || ""),
+      stage: String(form.get("stage") || ""),
+      website: String(form.get("website") || ""),
+      problem: String(form.get("problem") || ""),
+      solution: String(form.get("solution") || ""),
+      businessModel: String(form.get("businessModel") || ""),
+      traction: String(form.get("traction") || ""),
+    };
     persist(
       {
-        ...startup,
-        name: String(form.get("name") || ""),
-        founder: String(form.get("founder") || ""),
-        sector: String(form.get("sector") || ""),
-        stage: String(form.get("stage") || ""),
-        website: String(form.get("website") || ""),
-        problem: String(form.get("problem") || ""),
-        solution: String(form.get("solution") || ""),
-        businessModel: String(form.get("businessModel") || ""),
-        traction: String(form.get("traction") || ""),
+        ...nextStartup,
+        progress: getStartupProfileCompletion(nextStartup).percent,
       },
       "Girişim bilgileri kaydedildi.",
     );
@@ -61,19 +66,23 @@ export default function StartupDetailPage() {
     event.preventDefault();
     if (!startup) return;
     const form = new FormData(event.currentTarget);
+    const nextStartup = {
+      ...startup,
+      members: [
+        ...startup.members,
+        {
+          id: crypto.randomUUID(),
+          name: String(form.get("name") || ""),
+          role: String(form.get("role") || ""),
+          title: String(form.get("title") || ""),
+          active: true,
+        },
+      ],
+    };
     persist(
       {
-        ...startup,
-        members: [
-          ...startup.members,
-          {
-            id: crypto.randomUUID(),
-            name: String(form.get("name") || ""),
-            role: String(form.get("role") || ""),
-            title: String(form.get("title") || ""),
-            active: true,
-          },
-        ],
+        ...nextStartup,
+        progress: getStartupProfileCompletion(nextStartup).percent,
       },
       "Ekip üyesi eklendi.",
     );
@@ -163,6 +172,7 @@ export default function StartupDetailPage() {
     const completed = demoDayItems.filter((item) => startup.demoDayChecklist[item]).length;
     return Math.round((completed / demoDayItems.length) * 100);
   }, [startup]);
+  const profileCompletion = useMemo(() => getStartupProfileCompletion(startup), [startup]);
 
   if (!startup) {
     return (
@@ -190,16 +200,11 @@ export default function StartupDetailPage() {
             <h1 className="mt-2 text-4xl font-black">{startup.name}</h1>
             <p className="mt-2 text-sm text-slate-500">Programa Kabul: {startup.acceptedAt}</p>
           </div>
-          <div className="min-w-56">
-            <p className="text-sm font-black text-cyan-800">Program İlerlemesi %{startup.progress}</p>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={startup.progress}
-              onChange={(event) => persist({ ...startup, progress: Number(event.target.value) }, "İlerleme güncellendi.")}
-              className="mt-3 w-full accent-cyan-700"
-            />
+          <div className="min-w-56 rounded-md bg-slate-50 p-4">
+            <p className="text-sm font-black text-cyan-800">Profil Tamamlama %{profileCompletion.percent}</p>
+            <p className="mt-2 text-xs font-bold text-slate-500">
+              {profileCompletion.completedCount} / {profileCompletion.totalCount} alan dolu
+            </p>
           </div>
         </div>
         <div className="mt-6 flex flex-wrap gap-2">

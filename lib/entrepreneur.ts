@@ -12,6 +12,17 @@ export type EntrepreneurTask = {
   progress: string;
 };
 
+export type ProgramStage = {
+  id: string;
+  programId: string;
+  title: string;
+  order: number;
+  startDate: string;
+  endDate: string;
+  active: boolean;
+  description: string;
+};
+
 export type EntrepreneurTraining = {
   id: string;
   title: string;
@@ -33,16 +44,7 @@ export type EntrepreneurWorkspace = {
 };
 
 export const entrepreneurWorkspacesStorageKey = "lidea-entrepreneur-workspaces";
-
-export const defaultJourney = [
-  "Başvuru",
-  "Programa Kabul",
-  "Oryantasyon",
-  "Eğitim",
-  "Mentorluk",
-  "Pitch Hazırlığı",
-  "Demo Day",
-];
+export const programStagesStorageKey = "lidea-program-stages";
 
 function emptyWorkspace(email: string): EntrepreneurWorkspace {
   return {
@@ -89,6 +91,40 @@ export function saveEntrepreneurWorkspace(workspace: EntrepreneurWorkspace) {
     : [workspace, ...workspaces];
   window.localStorage.setItem(entrepreneurWorkspacesStorageKey, JSON.stringify(next));
   window.dispatchEvent(new Event("lidea-entrepreneur-workspaces-updated"));
+}
+
+export function readProgramStages() {
+  if (typeof window === "undefined") return [];
+  const saved = window.localStorage.getItem(programStagesStorageKey);
+  if (!saved) {
+    window.localStorage.setItem(programStagesStorageKey, JSON.stringify([]));
+    return [];
+  }
+
+  try {
+    return (JSON.parse(saved) as ProgramStage[])
+      .filter((stage) => !/^stage-\d+$/.test(stage.id))
+      .sort((a, b) => a.order - b.order);
+  } catch {
+    window.localStorage.setItem(programStagesStorageKey, JSON.stringify([]));
+    return [];
+  }
+}
+
+export function getProgramProgress(workspace: EntrepreneurWorkspace | null) {
+  const tasks = workspace?.tasks || [];
+  const completedTasks = tasks.filter((task) => task.status === "Tamamlandı").length;
+
+  return {
+    percent: tasks.length ? Math.round((completedTasks / tasks.length) * 100) : 0,
+    completedTasks,
+    totalTasks: tasks.length,
+    nextTask: tasks.find((task) => task.status !== "Tamamlandı") || null,
+    overdueTasks: tasks.filter((task) => {
+      if (!task.dueDate || task.status === "Tamamlandı") return false;
+      return new Date(`${task.dueDate}T23:59:59`) < new Date();
+    }),
+  };
 }
 
 export function findEntrepreneurApplication(email: string): Application | null {

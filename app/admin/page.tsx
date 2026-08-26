@@ -34,6 +34,7 @@ type AdminUser = {
     | "Süper Admin"
     | "Admin"
     | "Program Yetkilisi"
+    | "Yoklama Yetkilisi"
     | "Değerlendirme Yetkilisi"
     | "Jüri"
     | "Mentor"
@@ -944,6 +945,7 @@ export default function AdminPage() {
                     <select name="role" className={selectClass} defaultValue="Program Yetkilisi">
                       <option>Admin</option>
                       <option>Program Yetkilisi</option>
+                      <option>Yoklama Yetkilisi</option>
                       <option>Değerlendirme Yetkilisi</option>
                       <option>Jüri</option>
                       <option>Mentor</option>

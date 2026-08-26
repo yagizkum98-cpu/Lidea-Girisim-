@@ -76,25 +76,7 @@ const defaultProgram: Program = {
   kvkkRequired: true,
 };
 
-const defaultStages: ProgramStage[] = [
-  "Başvuru",
-  "Ön Değerlendirme",
-  "Jüri Değerlendirmesi",
-  "Programa Kabul",
-  "Eğitim",
-  "Mentorluk",
-  "MVP Geliştirme",
-  "Demo Day",
-].map((title, index) => ({
-  id: `stage-${index + 1}`,
-  programId: "program-3",
-  title,
-  order: index + 1,
-  startDate: "",
-  endDate: "",
-  active: true,
-  description: "",
-}));
+const defaultStages: ProgramStage[] = [];
 
 const inputClass =
   "h-11 rounded-md border border-slate-200 bg-white px-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-cyan-600";
@@ -126,7 +108,11 @@ function readStages() {
   }
 
   try {
-    return JSON.parse(saved) as ProgramStage[];
+    const stages = (JSON.parse(saved) as ProgramStage[])
+      .filter((stage) => !/^stage-\d+$/.test(stage.id))
+      .sort((a, b) => a.order - b.order);
+    window.localStorage.setItem(stagesStorageKey, JSON.stringify(stages));
+    return stages;
   } catch {
     window.localStorage.setItem(stagesStorageKey, JSON.stringify(defaultStages));
     return defaultStages;

@@ -16,6 +16,7 @@ import {
   normalizeMentorMeeting,
   readMentorMeetings,
   readMentors,
+  saveMentorAction,
   saveMentor,
   saveMentorMeeting,
   syncMentorUser,
@@ -166,6 +167,27 @@ export default function MentorDetailPage() {
       nextActions: String(form.get("nextActions") || ""),
     });
     saveMentorMeeting(meeting);
+    const nextActions = String(form.get("nextActions") || "").trim();
+    if (nextActions) {
+      saveMentorAction({
+        id: crypto.randomUUID(),
+        mentorId: mentor.id,
+        mentorName: mentor.name,
+        meetingId: meeting.id,
+        startupId: startup.id,
+        startupName: startup.name,
+        title: nextActions.split("\n")[0],
+        description: nextActions,
+        deadline: String(form.get("actionDeadline") || ""),
+        status: "Yapılacak",
+        submissionNote: "",
+        submissionFileName: "",
+        feedback: "",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        completedAt: "",
+      });
+    }
     const updatedMeetings = readMentorMeetings();
     const completedForStartup = updatedMeetings.filter(
       (item) =>
@@ -433,6 +455,7 @@ export default function MentorDetailPage() {
               <input name="link" className={inputClass} placeholder="Toplantı bağlantısı" />
               <input name="topic" className={inputClass} placeholder="Konu" />
               <textarea name="note" rows={3} className="rounded-md border border-slate-200 p-3 text-sm outline-none focus:border-cyan-600" placeholder="Mentor notu" />
+              <input name="actionDeadline" type="date" className={inputClass} />
               <textarea name="nextActions" rows={3} className="rounded-md border border-slate-200 p-3 text-sm outline-none focus:border-cyan-600" placeholder="Sonraki aksiyonlar" />
             </div>
             <button className="mt-4 h-11 w-full rounded-md bg-[#063f46] px-5 text-sm font-bold text-white">

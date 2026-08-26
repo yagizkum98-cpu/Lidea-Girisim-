@@ -85,6 +85,65 @@ export const preEvaluationItems = [
   "Gerekli belgeler mevcut",
 ];
 
+const applicationCompletionChecks = [
+  { key: "applicationNumber", label: "Başvuru No" },
+  { key: "founder", label: "Kurucu" },
+  { key: "email", label: "E-posta" },
+  { key: "phone", label: "Telefon" },
+  { key: "startup", label: "Girişim" },
+  { key: "period", label: "Dönem" },
+  { key: "sector", label: "Sektör" },
+  { key: "city", label: "Şehir" },
+  { key: "stage", label: "Aşama" },
+  { key: "website", label: "Web Sitesi" },
+  { key: "problem", label: "Problem" },
+  { key: "solution", label: "Çözüm" },
+  { key: "targetMarket", label: "Hedef Kitle" },
+  { key: "businessModel", label: "İş Modeli" },
+  { key: "competitors", label: "Rakipler" },
+  { key: "differentiation", label: "Farklılaşma" },
+  { key: "traction", label: "Traction" },
+  { key: "futureGoals", label: "Gelecek Hedefleri" },
+] as const;
+
+const applicationProcessSteps: { label: string; statuses: ApplicationStatus[] }[] = [
+  { label: "Başvuru", statuses: ["Yeni"] },
+  { label: "Ön İnceleme", statuses: ["İnceleniyor", "Eksik Bilgi"] },
+  { label: "Değerlendirme", statuses: ["Jüriye Gönderildi"] },
+  { label: "Sonuç", statuses: ["Kabul", "Yedek", "Reddedildi"] },
+];
+
+const friendlyStatus: Record<ApplicationStatus, { label: string; description: string }> = {
+  Yeni: {
+    label: "Gönderildi",
+    description: "Başvurunuz başarıyla alındı ve ön kontrol için sıraya eklendi.",
+  },
+  İnceleniyor: {
+    label: "Ön İncelemede",
+    description: "Başvurunuz değerlendirme ekibi tarafından inceleniyor.",
+  },
+  "Eksik Bilgi": {
+    label: "Ek Bilgi Gerekli",
+    description: "Başvurunuz için ek bilgi veya belge talebi bulunuyor.",
+  },
+  "Jüriye Gönderildi": {
+    label: "Jüri Aşamasında",
+    description: "Başvurunuz final değerlendirme aşamasına iletildi.",
+  },
+  Kabul: {
+    label: "Kabul Edildi",
+    description: "Tebrikler, başvurunuz programa kabul edildi.",
+  },
+  Yedek: {
+    label: "Yedek Liste",
+    description: "Başvurunuz yedek listeye alındı.",
+  },
+  Reddedildi: {
+    label: "Sonuçlandı",
+    description: "Başvuru süreciniz bu dönem için tamamlandı.",
+  },
+};
+
 const legacyDemoIds = new Set([
   "LID-0301",
   "LID-0302",
@@ -145,6 +204,60 @@ export function normalizeApplication(raw: Partial<Application> & Record<string, 
     submittedAt: String(raw.submittedAt || new Date().toISOString().slice(0, 10)),
     updatedAt: String(raw.updatedAt || new Date().toISOString()),
   } satisfies Application;
+}
+
+export function getApplicationSubmissionCompletion(application: Application | null) {
+  const items = applicationCompletionChecks.map((item) => {
+    if (!application) return { label: item.label, completed: false };
+    const value = application[item.key];
+    return { label: item.label, completed: String(value || "").trim().length > 0 };
+  });
+  const completedCount = items.filter((item) => item.completed).length;
+
+  return {
+    percent: items.length ? Math.round((completedCount / items.length) * 100) : 0,
+    completedCount,
+    totalCount: items.length,
+    items,
+  };
+}
+
+export function getApplicationProcess(application: Application | null) {
+  if (!application) {
+    return {
+      percent: 0,
+      statusLabel: "Başvuru yok",
+      description: "Başvuru formu doldurulduğunda bu alan canlı olarak güncellenir.",
+      steps: applicationProcessSteps.map((step) => ({
+        label: step.label,
+        state: "Bekliyor" as const,
+      })),
+    };
+  }
+
+  const activeStepIndex = applicationProcessSteps.findIndex((step) =>
+    step.statuses.includes(application.status),
+  );
+  const resultIndex = applicationProcessSteps.length - 1;
+  const isFinished = activeStepIndex === resultIndex;
+  const completedSteps = isFinished
+    ? applicationProcessSteps.length
+    : Math.max(activeStepIndex + 1, 0);
+
+  return {
+    percent: Math.round((completedSteps / applicationProcessSteps.length) * 100),
+    statusLabel: friendlyStatus[application.status].label,
+    description: friendlyStatus[application.status].description,
+    steps: applicationProcessSteps.map((step, index) => ({
+      label: step.label,
+      state:
+        index < completedSteps
+          ? ("Tamamlandı" as const)
+          : index === activeStepIndex
+            ? ("Devam Ediyor" as const)
+            : ("Bekliyor" as const),
+    })),
+  };
 }
 
 export function readApplications() {
