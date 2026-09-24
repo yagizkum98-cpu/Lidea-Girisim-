@@ -1,0 +1,20 @@
+<svg width="360" height="160" viewBox="0 0 360 160" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Lidea Logo</title>
+  <desc id="desc">Lidea Likya Idea Girişim Programı logosu</desc>
+  <g transform="translate(16 12)">
+    <path d="M34 12c12 15 13 31 2 49-12-15-13-32-3-50l1 1Z" fill="#48B94A"/>
+    <path d="M26 34C13 28 6 18 5 5c13 4 22 13 27 27l-6 2Z" fill="#2FA44A"/>
+    <path d="M41 34c3-14 12-24 27-30-1 15-9 26-24 33l-3-3Z" fill="#57C754"/>
+    <path d="M26 64C11 58 3 47 1 32c15 4 25 14 31 29l-6 3Z" fill="#39AC4A"/>
+    <path d="M42 63c5-15 16-25 33-29-3 16-13 27-30 32l-3-3Z" fill="#43B24A"/>
+    <path d="M29 92C15 87 7 77 5 63c15 3 25 12 30 27l-6 2Z" fill="#2D9D49"/>
+    <path d="M42 91c6-13 17-22 33-25-4 15-15 25-31 29l-2-4Z" fill="#37A949"/>
+    <path d="M35 14v94" stroke="#F26A21" stroke-width="7" stroke-linecap="round"/>
+    <path d="M26 91v20c0 9 7 16 17 16h54" stroke="#F26A21" stroke-width="8" stroke-linecap="round"/>
+    <path d="M14 109c0 20 13 32 37 32h47c7 0 11 4 11 9s-4 9-11 9H43c-24 0-39-11-43-31" stroke="#0B78A0" stroke-width="8" stroke-linecap="round"/>
+    <path d="M15 120c8 13 21 19 40 19h43" stroke="#17A7D6" stroke-width="5" stroke-linecap="round"/>
+    <path d="M35 14v94" stroke="#ffffff" stroke-opacity=".72" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+  <text x="132" y="92" fill="#4B5563" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="300" letter-spacing="9">LİDEA</text>
+  <text x="135" y="118" fill="#4B5563" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" font-style="italic" letter-spacing="1.2">LİKYA İDEA GİRİŞİM PROGRAMI</text>
+</svg>

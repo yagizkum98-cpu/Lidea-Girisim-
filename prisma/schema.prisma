@@ -1,0 +1,395 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  PROGRAM_ADMIN
+  ENTREPRENEUR
+  EVALUATOR
+  MENTOR
+  JURY
+}
+
+enum ProgramStatus {
+  DRAFT
+  APPLICATIONS_OPEN
+  APPLICATIONS_CLOSED
+  EVALUATION
+  ACTIVE
+  COMPLETED
+}
+
+enum ApplicationStatus {
+  NEW
+  UNDER_REVIEW
+  MISSING_INFO
+  SENT_TO_JURY
+  ACCEPTED
+  WAITLIST
+  REJECTED
+}
+
+enum StartupStatus {
+  ACTIVE
+  DEMO_DAY_READY
+  GRADUATED
+  PASSIVE
+  LEFT_PROGRAM
+}
+
+enum EvaluationRecommendation {
+  ACCEPT
+  WAITLIST
+  REJECT
+}
+
+enum NotificationStatus {
+  DRAFT
+  SENT
+  SCHEDULED
+  FAILED
+}
+
+enum NotificationType {
+  ANNOUNCEMENT
+  REMINDER
+  STATUS_UPDATE
+  DOCUMENT_TASK
+  EVENT
+}
+
+model User {
+  id             String          @id @default(cuid()) @map("_id")
+  name           String
+  email          String          @unique
+  passwordHash   String
+  role           Role
+  active         Boolean         @default(true)
+  ownedStartups  Startup[]       @relation("StartupOwner")
+  applications   Application[]
+  evaluations    Evaluation[]
+  evaluatorTasks EvaluationAssignment[] @relation("EvaluatorAssignments")
+  mentorTasks    MentorAssignment[]
+  juryTasks       JuryMemberAssignment[]
+  notifications  NotificationRecipient[]
+  auditLogs       AuditLog[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model Program {
+  id                  String         @id @default(cuid()) @map("_id")
+  name                String
+  period              String
+  description         String?
+  quota               Int           @default(40)
+  status              ProgramStatus @default(DRAFT)
+  applicationOpen     Boolean       @default(false)
+  applicationStart    DateTime?
+  applicationDeadline DateTime?
+  programStart        DateTime?
+  programEnd          DateTime?
+  stages              ProgramStage[]
+  applications        Application[]
+  startups            Startup[]
+  trainings           Training[]
+  jurySessions        JurySession[]
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+}
+
+model ProgramStage {
+  id          String    @id @default(cuid()) @map("_id")
+  programId   String
+  program     Program   @relation(fields: [programId], references: [id], onDelete: Cascade)
+  title       String
+  order       Int
+  startDate   DateTime?
+  endDate     DateTime?
+  active      Boolean   @default(true)
+  description String?
+}
+
+model Application {
+  id             String                 @id @default(cuid()) @map("_id")
+  applicationNo  String                 @unique
+  programId      String
+  programTrack   String?
+  program        Program                @relation(fields: [programId], references: [id], onDelete: Cascade)
+  userId         String?
+  user           User?                  @relation(fields: [userId], references: [id])
+  founder        String
+  email          String
+  phone          String?
+  startupName    String
+  sector         String
+  city           String?
+  district       String?
+  stage          String
+  website        String?
+  teamSize       Int                    @default(1)
+  problem        String?
+  solution       String?
+    targetMarket   String?
+    businessModel  String?
+    competitors    String?
+    differentiation String?
+    traction       String?
+    futureGoals    String?
+    programExpectations String[] @default([])
+  programExpectationOther String?
+  kvkkAccepted   Boolean                @default(false)
+  kvkkAcceptedAt DateTime?
+  status         ApplicationStatus      @default(NEW)
+  score          Int                    @default(0)
+  juryScore      Int                    @default(0)
+  startup        Startup?
+  documents      ApplicationDocument[]
+  assignments    EvaluationAssignment[]
+  evaluations    Evaluation[]
+  history        StatusHistory[]
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+}
+
+model ApplicationDocument {
+  id            String      @id @default(cuid()) @map("_id")
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  fileName      String
+  fileKey       String
+  mimeType      String
+  size          Int
+  uploadedAt    DateTime    @default(now())
+}
+
+model EvaluationAssignment {
+  id            String      @id @default(cuid()) @map("_id")
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  evaluatorId   String
+  evaluator     User        @relation("EvaluatorAssignments", fields: [evaluatorId], references: [id])
+  dueDate       DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime    @default(now())
+
+  @@unique([applicationId, evaluatorId])
+}
+
+model Evaluation {
+  id                String                    @id @default(cuid()) @map("_id")
+  applicationId     String
+  application       Application               @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  evaluatorId       String
+  evaluator         User                      @relation(fields: [evaluatorId], references: [id])
+  problem           Int                       @default(0)
+  solution          Int                       @default(0)
+  innovation        Int                       @default(0)
+  marketPotential   Int                       @default(0)
+  businessModel     Int                       @default(0)
+  scalability       Int                       @default(0)
+  team              Int                       @default(0)
+  feasibility       Int                       @default(0)
+  total             Int                       @default(0)
+  comment           String?
+  recommendation    EvaluationRecommendation?
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+}
+
+model Startup {
+  id             String             @id @default(cuid()) @map("_id")
+  applicationId  String?            @unique
+  application    Application?       @relation(fields: [applicationId], references: [id])
+  programId      String
+  programTrack   String?
+  program        Program            @relation(fields: [programId], references: [id], onDelete: Cascade)
+  ownerId        String?
+  owner          User?              @relation("StartupOwner", fields: [ownerId], references: [id])
+  name           String
+  slug           String
+  logo           String?
+  sector         String?
+  stage          String?
+  website        String?
+  problem        String?
+  solution       String?
+  businessModel  String?
+  status         StartupStatus      @default(ACTIVE)
+  progress       Int                @default(0)
+  members        StartupMember[]
+  documents      StartupDocument[]
+  pitchDecks     PitchDeck[]
+  mentorTasks    MentorAssignment[]
+  demoDay        DemoDayProgress?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+}
+
+model StartupMember {
+  id        String  @id @default(cuid()) @map("_id")
+  startupId String
+  startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  name      String
+  role      String
+  title     String?
+  active    Boolean @default(true)
+}
+
+model StartupDocument {
+  id         String   @id @default(cuid()) @map("_id")
+  startupId  String
+  startup    Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  fileName   String
+  fileKey    String
+  mimeType   String
+  size       Int
+  uploadedAt DateTime @default(now())
+}
+
+model PitchDeck {
+  id         String   @id @default(cuid()) @map("_id")
+  startupId  String
+  startup    Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  version    Int
+  fileName   String
+  fileKey    String
+  uploadedAt DateTime @default(now())
+}
+
+model MentorAssignment {
+  id                 String          @id @default(cuid()) @map("_id")
+  startupId          String
+  startup            Startup         @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  mentorId           String
+  mentor             User            @relation(fields: [mentorId], references: [id])
+  expertise          String?
+  primary            Boolean         @default(true)
+  targetMeetingCount Int             @default(4)
+  sessions           MentorSession[]
+  actions            MentorAction[]
+  createdAt          DateTime        @default(now())
+
+  @@unique([startupId, mentorId])
+}
+
+model MentorSession {
+  id                 String           @id @default(cuid()) @map("_id")
+  mentorAssignmentId String
+  mentorAssignment   MentorAssignment @relation(fields: [mentorAssignmentId], references: [id], onDelete: Cascade)
+  date               DateTime
+  durationMinutes    Int              @default(60)
+  type               String
+  topic              String?
+  meetingUrl         String?
+  completed          Boolean          @default(false)
+  note               String?
+  nextActions        String?
+}
+
+model MentorAction {
+  id                 String           @id @default(cuid()) @map("_id")
+  mentorAssignmentId String
+  mentorAssignment   MentorAssignment @relation(fields: [mentorAssignmentId], references: [id], onDelete: Cascade)
+  title              String
+  dueDate            DateTime?
+  completed          Boolean          @default(false)
+}
+
+model Training {
+  id          String   @id @default(cuid()) @map("_id")
+  programId   String
+  program     Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  startsAt    DateTime
+  location    String?
+  createdAt   DateTime @default(now())
+}
+
+model JurySession {
+  id          String                 @id @default(cuid()) @map("_id")
+  programId   String
+  program     Program                @relation(fields: [programId], references: [id], onDelete: Cascade)
+  title       String
+  startsAt    DateTime?
+  assignments JuryMemberAssignment[]
+  evaluations JuryEvaluation[]
+}
+
+model JuryMemberAssignment {
+  id            String      @id @default(cuid()) @map("_id")
+  jurySessionId String
+  jurySession   JurySession @relation(fields: [jurySessionId], references: [id], onDelete: Cascade)
+  juryId        String
+  jury          User        @relation(fields: [juryId], references: [id])
+}
+
+model JuryEvaluation {
+  id            String      @id @default(cuid()) @map("_id")
+  jurySessionId String
+  jurySession   JurySession @relation(fields: [jurySessionId], references: [id], onDelete: Cascade)
+  startupId     String
+  juryId        String
+  total         Int         @default(0)
+  comment       String?
+  createdAt     DateTime    @default(now())
+}
+
+model DemoDayProgress {
+  id        String  @id @default(cuid()) @map("_id")
+  startupId String  @unique
+  startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  ready     Boolean @default(false)
+  checklist Json    @default("{}")
+}
+
+model Notification {
+  id          String                  @id @default(cuid()) @map("_id")
+  title       String
+  message     String
+  type        NotificationType
+  status      NotificationStatus      @default(DRAFT)
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  recipients  NotificationRecipient[]
+  createdAt   DateTime                @default(now())
+}
+
+model NotificationRecipient {
+  id             String       @id @default(cuid()) @map("_id")
+  notificationId String
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  userId         String?
+  user           User?        @relation(fields: [userId], references: [id])
+  email          String
+  role           Role?
+  readAt         DateTime?
+}
+
+model StatusHistory {
+  id            String            @id @default(cuid()) @map("_id")
+  applicationId String
+  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  oldStatus     ApplicationStatus
+  newStatus     ApplicationStatus
+  changedById   String?
+  createdAt     DateTime          @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid()) @map("_id")
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+}

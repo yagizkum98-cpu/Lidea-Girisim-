@@ -1,0 +1,65 @@
+import { db } from "@/lib/db";
+
+export async function listApplications() {
+  return db.application.findMany({
+    orderBy: { createdAt: "desc" },
+    include: {
+      program: true,
+      assignments: { include: { evaluator: true } },
+      documents: true,
+    },
+  });
+}
+
+export async function acceptApplication(
+  applicationId: string,
+  programTrack: "Ön Kuluçka" | "Kuluçka",
+  adminUserId?: string,
+) {
+  return db.$transaction(async (tx) => {
+    const current = await tx.application.findUniqueOrThrow({ where: { id: applicationId } });
+    const application = await tx.application.update({
+      where: { id: applicationId },
+      data: { status: "ACCEPTED", programTrack },
+    });
+
+    const startup = await tx.startup.upsert({
+      where: { applicationId },
+      update: { programTrack },
+      create: {
+        applicationId,
+        programId: application.programId,
+        programTrack,
+        ownerId: application.userId,
+        name: application.startupName,
+        slug: application.startupName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        sector: application.sector,
+        stage: application.stage,
+        website: application.website,
+        problem: application.problem,
+        solution: application.solution,
+        businessModel: application.businessModel,
+        progress: 0,
+      },
+    });
+
+    await tx.statusHistory.create({
+      data: {
+        applicationId,
+        oldStatus: current.status,
+        newStatus: "ACCEPTED",
+        changedById: adminUserId,
+      },
+    });
+
+    return { application, startup };
+  });
+}
+
+export async function assignEvaluator(applicationId: string, evaluatorId: string, dueDate?: Date) {
+  return db.evaluationAssignment.upsert({
+    where: { applicationId_evaluatorId: { applicationId, evaluatorId } },
+    update: { dueDate },
+    create: { applicationId, evaluatorId, dueDate },
+  });
+}

@@ -1,0 +1,19 @@
+<svg width="640" height="640" viewBox="0 0 640 640" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Altan Türel Profil Görseli</title>
+  <desc id="desc">Altan Türel için profil görsel alanı</desc>
+  <rect width="640" height="640" fill="#062f36"/>
+  <circle cx="320" cy="198" r="106" fill="#d99168"/>
+  <path d="M219 320c34-48 74-72 119-72 53 0 93 27 122 80 39 23 70 67 93 132 12 35-12 72-49 72H135c-37 0-61-38-48-73 23-65 67-111 132-139Z" fill="#191817"/>
+  <path d="M233 360c56 28 115 34 177 18 45 33 77 84 96 154H129c23-80 58-137 104-172Z" fill="#242220"/>
+  <path d="M253 230c30 42 74 60 132 54-14 35-38 55-72 58-35-8-56-32-60-112Z" fill="#b36d4f" opacity=".5"/>
+  <path d="M247 184c-8 30-17 57-28 81-20-58 6-126 80-145 70-17 124 16 146 89-56-38-122-46-198-25Z" fill="#1b1612"/>
+  <ellipse cx="283" cy="211" rx="16" ry="9" fill="#251711"/>
+  <ellipse cx="363" cy="211" rx="16" ry="9" fill="#251711"/>
+  <path d="M293 268c19 16 42 16 63 0" stroke="#332018" stroke-width="11" stroke-linecap="round"/>
+  <path d="M270 246c37 22 74 22 111 0" stroke="#26201d" stroke-width="28" stroke-linecap="round"/>
+  <path d="M270 232c12-8 26-9 42-3M345 229c14-5 29-4 43 3" stroke="#4b2b1e" stroke-width="8" stroke-linecap="round"/>
+  <path d="M259 300c33 41 91 42 126 0" stroke="#24201d" stroke-width="22" stroke-linecap="round"/>
+  <path d="M296 285c14 9 35 9 50 0" stroke="#f1c1a2" stroke-width="8" stroke-linecap="round"/>
+  <path d="M129 532c64-54 129-81 196-80 72 1 134 27 186 80" stroke="#2e2c2a" stroke-width="28" stroke-linecap="round"/>
+  <circle cx="320" cy="320" r="302" stroke="#17e6d2" stroke-opacity=".35" stroke-width="10"/>
+</svg>
