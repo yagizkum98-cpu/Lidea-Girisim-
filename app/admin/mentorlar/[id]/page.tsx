@@ -10,7 +10,6 @@ import {
   MeetingStatus,
   MeetingType,
   assignStartupsToMentor,
-  getMentorStartups,
   meetingStatuses,
   mentorExpertiseOptions,
   normalizeMentorMeeting,
@@ -56,7 +55,18 @@ export default function MentorDetailPage() {
     };
   }, [params.id]);
 
-  const assignedStartups = useMemo(() => (mentor ? getMentorStartups(mentor) : []), [mentor, startups]);
+  const assignedStartups = useMemo(
+    () =>
+      mentor
+        ? startups.filter(
+            (startup) =>
+              startup.mentor?.mentorId === mentor.id ||
+              startup.mentor?.mentorEmail === mentor.email ||
+              startup.mentor?.mentorName === mentor.name,
+          )
+        : [],
+    [mentor, startups],
+  );
   const mentorMeetings = useMemo(
     () => (mentor ? meetings.filter((meeting) => meeting.mentorId === mentor.id) : []),
     [meetings, mentor],

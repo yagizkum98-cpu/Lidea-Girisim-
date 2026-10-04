@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import ApplicationCta from "@/components/ApplicationCta";
 import Header from "@/components/Header";
 import LideaCheckPublicAnnouncements from "@/components/LideaCheckPublicAnnouncements";
@@ -52,6 +53,8 @@ const ecosystemPartners = [
 const pressCards = [
   {
     source: "Demirören Haber Ajansı (DHA)",
+    sourceLogo: "/dha-logo.svg",
+    sourceLogoClassName: "h-10",
     title: "Fethiye'nin ücretsiz girişimcilik programı tanıtıldı",
     description:
       "Programın ilk döneminde 50'den fazla başvuru alındığı, 26 girişimin ön kuluçkaya ve 14 girişimin kuluçkaya kabul edildiği aktarıldı.",
@@ -59,6 +62,8 @@ const pressCards = [
   },
   {
     source: "Demirören Haber Ajansı (DHA)",
+    sourceLogo: "/dha-logo.svg",
+    sourceLogoClassName: "h-10",
     title: "Fethiye'de LİDEA Demo Day etkinliği gerçekleşti",
     description:
       "LIDEA Demo Day'in girişimcileri yatırımcılar, jüri üyeleri ve ekosistem temsilcileriyle buluşturduğu aktarıldı.",
@@ -66,6 +71,7 @@ const pressCards = [
   },
   {
     source: "eGirişim",
+    sourceLogo: "/egirisim-logo.svg",
     title: "Fethiye bölgesinin ilk girişimcilik programı: LİDEA",
     description:
       "24 haftalık programın ardından 15 girişimin yatırımcı ve jüri karşısına çıktığı haberleştirildi.",
@@ -73,6 +79,10 @@ const pressCards = [
   },
   {
     source: "Fethiye TV",
+    sourceLogo: "/fethiye-tv-logo.svg",
+    sourceLogoClassName: "h-14",
+    sourceLogoWidth: 174,
+    sourceLogoHeight: 64,
     title: "Lidea Girişimcilik Programı'nda Demo Day heyecanı",
     description:
       "15 girişimcinin projelerini yatırımcılar ve jüri önünde sunduğu Demo Day yerel basına yansıdı.",
@@ -80,6 +90,10 @@ const pressCards = [
   },
   {
     source: "İstanbul Arel Üniversitesi - ArtıArel",
+    sourceLogo: "/arel-artiarel-logos.svg",
+    sourceLogoClassName: "h-16",
+    sourceLogoWidth: 220,
+    sourceLogoHeight: 64,
     title: "Fethiye'den yükselen yenilik dalgası",
     description:
       "LIDEA, Fethiye'den yükselen girişimcilik ve yenilik hareketi olarak ele alındı; Agritech, yapay zeka, sürdürülebilirlik, turizm ve sağlık teknolojileri alanlarındaki girişimlere dikkat çekildi.",
@@ -242,11 +256,13 @@ export default function Home() {
           <div className="mt-8 grid gap-5 md:grid-cols-3">
             {boardMembers.map((member) => (
               <article className="card p-6 text-center" key={member.name}>
-                <div className="mx-auto flex aspect-square w-full max-w-[220px] items-center justify-center overflow-hidden rounded-3xl border border-cyan-600/25 bg-gradient-to-br from-white/60 via-[#d8fbff]/60 to-[#eafff8]/60 shadow-[0_0_28px_rgba(23,230,210,.24)]">
+                <div className="relative mx-auto flex aspect-square w-full max-w-[220px] items-center justify-center overflow-hidden rounded-3xl border border-cyan-600/25 bg-gradient-to-br from-white/60 via-[#d8fbff]/60 to-[#eafff8]/60 shadow-[0_0_28px_rgba(23,230,210,.24)]">
                   {member.image ? (
-                    <img
+                    <Image
                       src={member.image}
                       alt={`${member.name} profil fotoğrafı`}
+                      fill
+                      sizes="(min-width: 768px) 220px, 60vw"
                       className="h-full w-full object-cover object-top"
                     />
                   ) : (
@@ -291,9 +307,19 @@ export default function Home() {
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {pressCards.map((item) => (
             <article className="card flex min-h-[280px] flex-col p-7" key={item.href}>
-              <p className="text-sm font-black uppercase text-[#0b7f5a]">
-                {item.source}
-              </p>
+              {item.sourceLogo ? (
+                <Image
+                  src={item.sourceLogo}
+                  alt={`${item.source} logosu`}
+                  width={item.sourceLogoWidth ?? 144}
+                  height={item.sourceLogoHeight ?? 38}
+                  className={`${item.sourceLogoClassName ?? "h-7"} w-auto object-contain object-left`}
+                />
+              ) : (
+                <p className="text-sm font-black uppercase text-[#0b7f5a]">
+                  {item.source}
+                </p>
+              )}
               <h3 className="mt-5 text-2xl font-black leading-tight">
                 {item.title}
               </h3>
@@ -341,9 +367,11 @@ export default function Home() {
             {ecosystemPartners.map((partner) => (
               <div className="partner-logo-cell flex min-h-24 items-center justify-center bg-[#effffa] p-5 text-center font-black" key={partner.name}>
                 {partner.logo ? (
-                  <img
+                  <Image
                     src={partner.logo}
                     alt={`${partner.name} logosu`}
+                    width={208}
+                    height={112}
                     className={`${partner.logoClassName || "h-24 w-24"} object-contain`}
                   />
                 ) : (
@@ -426,6 +454,52 @@ export default function Home() {
           />
         </div>
       </section>
+
+      <footer className="border-t border-cyan-800/15 px-6 py-10 text-center">
+        <div className="mx-auto flex max-w-7xl flex-col items-center">
+          <Image
+            src="/lidea-logo.svg"
+            alt="Likya Idea Girişim Programı"
+            width={160}
+            height={160}
+            className="h-32 w-auto object-contain"
+          />
+
+          <div className="mt-6 flex items-center gap-3">
+            {[
+              {
+                name: "LinkedIn",
+                symbol: "in",
+                href: "https://www.linkedin.com/company/lideagirisim/posts/?feedView=all",
+              },
+              {
+                name: "Instagram",
+                symbol: "📷",
+                href: "https://www.instagram.com/lideagirisim/",
+              },
+              { name: "X", symbol: "X", href: "https://x.com/LideaGirisim" },
+              {
+                name: "YouTube",
+                symbol: "▶",
+                href: "https://www.youtube.com/@lideagirisim",
+              },
+            ].map((social) => (
+              <a
+                key={social.name}
+                href={social.href}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={social.name}
+                title={social.name}
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-cyan-800/20 bg-white text-base font-black text-[#052f36] shadow-sm transition hover:-translate-y-0.5 hover:border-[#00a6c8] hover:bg-[#052f36] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00a6c8]"
+              >
+                <span aria-hidden="true">{social.symbol}</span>
+              </a>
+            ))}
+          </div>
+
+        </div>
+      </footer>
     </main>
   );
 }

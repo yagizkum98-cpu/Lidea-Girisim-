@@ -8,7 +8,6 @@ import {
   ApplicationStatus,
   ProgramTrack,
   addAdminActivity,
-  applicationStatuses,
   preEvaluationItems,
   readApplications,
   saveApplication,

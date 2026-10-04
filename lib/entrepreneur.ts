@@ -1,6 +1,6 @@
 import { Application, readApplications } from "@/lib/applications";
 import { MentorMeeting, readMentorMeetings } from "@/lib/mentors";
-import { Startup, StartupDocument, StartupMember, StartupNote, normalizeStartup, readStartups, saveStartup, syncAcceptedApplicationsToStartups } from "@/lib/startups";
+import { Startup, StartupDocument, StartupNote, normalizeStartup, readStartups, saveStartup, syncAcceptedApplicationsToStartups } from "@/lib/startups";
 
 export type EntrepreneurTaskStatus = "Bekliyor" | "Devam Ediyor" | "Tamamlandı";
 

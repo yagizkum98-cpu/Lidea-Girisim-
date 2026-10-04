@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   Application,
@@ -215,7 +216,6 @@ export default function EntrepreneurPanel() {
   const nextMentorMeeting = meetings
     .filter((meeting) => meeting.status === "Planlandı")
     .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`))[0];
-  const nextMeeting = meetings.find((meeting) => meeting.status === "Planlandı");
   const unreadCount = notifications.reduce(
     (sum, notification) =>
       sum +
@@ -415,7 +415,7 @@ export default function EntrepreneurPanel() {
       <main className="min-h-screen bg-[#f6fbfc] px-6 py-10 text-slate-950">
         <section className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl items-center gap-10 lg:grid-cols-[1fr_.9fr]">
           <div>
-            <img src="/lidea-logo.svg" alt="Lidea" className="h-16 w-auto" />
+            <Image src="/lidea-logo.svg" alt="Lidea" width={180} height={64} className="h-16 w-auto" priority />
             <h1 className="mt-10 max-w-xl text-5xl font-black tracking-tight">Girişimci Paneli</h1>
             <p className="mt-5 max-w-lg text-lg leading-8 text-slate-600">
               Admin tarafından tanımlanan girişimci hesabıyla program durumunuzu, başvurunuzu,
@@ -446,7 +446,7 @@ export default function EntrepreneurPanel() {
       <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
         <aside className="border-r border-slate-200 bg-white">
           <div className="border-b border-slate-200 px-6 py-5">
-            <img src="/lidea-logo.svg" alt="Lidea" className="h-12 w-auto" />
+            <Image src="/lidea-logo.svg" alt="Lidea" width={160} height={48} className="h-12 w-auto" priority />
             <p className="mt-4 text-xs font-bold uppercase tracking-[.18em] text-cyan-700">Girişimci Paneli</p>
           </div>
           <nav className="grid gap-1 p-3">

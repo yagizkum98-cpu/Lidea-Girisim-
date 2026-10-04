@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 200" role="img" aria-labelledby="title">
+  <title id="title">İstanbul Arel Üniversitesi ve ArtıArel</title>
+  <defs>
+    <path id="arelArc" d="M20 103a83 83 0 0 1 166 0"/>
+  </defs>
+  <g transform="translate(4 4)">
+    <circle cx="100" cy="96" r="92" fill="#ffffff" stroke="#07549a" stroke-width="4"/>
+    <circle cx="100" cy="96" r="83" fill="none" stroke="#b89955" stroke-width="2"/>
+    <text fill="#07549a" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700">
+      <textPath href="#arelArc" startOffset="50%" text-anchor="middle">İSTANBUL AREL ÜNİVERSİTESİ</textPath>
+    </text>
+    <circle cx="100" cy="61" r="11" fill="#07549a"/>
+    <path d="M48 148 91 76h18l12 17v43l-21-38-31 50H48z" fill="#07549a"/>
+    <path d="M84 76H62v61c0 8 2 14 7 19l14-23c-1-3-2-6-2-10V90l3-6v-8zm38 0h21v47c0 11 4 18 12 25h-23l-12-19c2-4 2-8 2-13V76z" fill="#b89955"/>
+    <path d="m143 123 24 25h-28l-8-11c5-3 9-8 12-14z" fill="#07549a"/>
+    <text x="100" y="174" fill="#07549a" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="middle">2007</text>
+  </g>
+  <g transform="translate(235 48)">
+    <g fill="none" stroke="#7bc943" stroke-linecap="round">
+      <path d="M8 51c17-6 39-6 57 0-17 7-39 7-57 0z" stroke-width="6"/>
+      <path d="M37 22c7 17 7 39 0 57-7-17-7-39 0-57z" stroke-width="6"/>
+      <path d="M16 30c14 9 25 21 34 35" stroke-width="3"/>
+    </g>
+    <text x="62" y="76" fill="#7bc943" font-family="Arial, Helvetica, sans-serif" font-size="65" letter-spacing="-4">artı</text>
+    <text x="184" y="76" fill="#0875bb" font-family="Arial, Helvetica, sans-serif" font-size="65" letter-spacing="-4">arel</text>
+  </g>
+</svg>

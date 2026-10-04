@@ -35,9 +35,13 @@ export default function EvaluatorsPage() {
   const [expertise, setExpertise] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [notice, setNotice] = useState("");
+  const [applications, setApplications] = useState<ReturnType<typeof readApplications>>([]);
 
   useEffect(() => {
-    const sync = () => setEvaluators(readEvaluators());
+    const sync = () => {
+      setEvaluators(readEvaluators());
+      setApplications(readApplications());
+    };
     sync();
     window.addEventListener("focus", sync);
     window.addEventListener("storage", sync);
@@ -51,8 +55,6 @@ export default function EvaluatorsPage() {
       window.removeEventListener("lidea-applications-updated", sync);
     };
   }, []);
-
-  const applications = typeof window === "undefined" ? [] : readApplications();
 
   const metrics = useMemo(() => {
     const assigned = applications.filter((application) => application.juryAssignees.length > 0);

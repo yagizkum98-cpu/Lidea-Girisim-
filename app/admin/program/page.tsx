@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
@@ -245,7 +246,7 @@ export default function ProgramManagementPage() {
     return (
       <main className="min-h-screen bg-[#f6fbfc] px-6 py-10 text-slate-950">
         <section className="mx-auto max-w-xl rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
-          <img src="/lidea-logo.svg" alt="Lidea" className="h-14 w-auto" />
+          <Image src="/lidea-logo.svg" alt="Lidea" width={160} height={56} className="h-14 w-auto" priority />
           <h1 className="mt-8 text-3xl font-black">Program Yönetimi</h1>
           <p className="mt-3 text-slate-500">
             Bu ekranı kullanmak için önce admin paneline süper admin, admin veya program yetkilisi

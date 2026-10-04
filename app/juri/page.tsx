@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { readApplications } from "@/lib/applications";
 
@@ -230,7 +231,7 @@ export default function JuryPanel() {
       <main className="min-h-screen bg-[#f6fbfc] px-6 py-10 text-slate-950">
         <section className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl items-center gap-10 lg:grid-cols-[1fr_.9fr]">
           <div>
-            <img src="/lidea-logo.svg" alt="Lidea" className="h-16 w-auto" />
+            <Image src="/lidea-logo.svg" alt="Lidea" width={180} height={64} className="h-16 w-auto" priority />
             <h1 className="mt-10 max-w-xl text-5xl font-black tracking-tight">
               Jüri ve Değerlendirici Paneli
             </h1>

@@ -9,7 +9,6 @@ import {
   assignApplicationsToEvaluator,
   evaluationCriteria,
   expertiseOptions,
-  getEvaluatorAssignments,
   readEvaluators,
   saveEvaluator,
   syncEvaluatorUser,
@@ -46,7 +45,15 @@ export default function EvaluatorDetailPage() {
   }, [params.id]);
 
   const assignments = useMemo(
-    () => (evaluator ? getEvaluatorAssignments(evaluator.email) : []),
+    () =>
+      evaluator
+        ? applications
+            .filter((application) => application.juryAssignees.includes(evaluator.email))
+            .map((application) => ({
+              application,
+              status: application.juryScore > 0 ? "Tamamlandı" : "Bekliyor",
+            }))
+        : [],
     [applications, evaluator],
   );
 

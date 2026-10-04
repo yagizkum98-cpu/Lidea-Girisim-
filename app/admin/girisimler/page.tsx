@@ -4,7 +4,6 @@ import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   Startup,
-  StartupStatus,
   getStartupProfileCompletion,
   normalizeStartup,
   readStartups,

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { syncAcceptedApplicationsToStartups } from "@/lib/startups";
+import { Startup, syncAcceptedApplicationsToStartups } from "@/lib/startups";
 import {
   Mentor,
   mentorExpertiseOptions,
@@ -36,9 +36,15 @@ export default function MentorsPage() {
   const [status, setStatus] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [notice, setNotice] = useState("");
+  const [startups, setStartups] = useState<Startup[]>([]);
+  const [meetings, setMeetings] = useState<ReturnType<typeof readMentorMeetings>>([]);
 
   useEffect(() => {
-    const sync = () => setMentors(readMentors());
+    const sync = () => {
+      setMentors(readMentors());
+      setStartups(syncAcceptedApplicationsToStartups());
+      setMeetings(readMentorMeetings());
+    };
     sync();
     window.addEventListener("focus", sync);
     window.addEventListener("storage", sync);
@@ -54,9 +60,6 @@ export default function MentorsPage() {
       window.removeEventListener("lidea-mentor-meetings-updated", sync);
     };
   }, []);
-
-  const startups = typeof window === "undefined" ? [] : syncAcceptedApplicationsToStartups();
-  const meetings = typeof window === "undefined" ? [] : readMentorMeetings();
 
   const metrics = useMemo(() => {
     const assigned = startups.filter((startup) => startup.mentor);

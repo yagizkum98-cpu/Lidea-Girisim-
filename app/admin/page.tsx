@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 type ApplicationStatus =
@@ -83,6 +85,18 @@ const menu = [
   "Ayarlar",
 ];
 
+const menuRoutes: Partial<Record<(typeof menu)[number], string>> = {
+  "Başvurular": "/admin/basvurular",
+  "Girişimler": "/admin/girisimler",
+  "Jüri": "/juri",
+  "Değerlendiriciler": "/admin/degerlendiriciler",
+  "Mentorlar": "/admin/mentorlar",
+  "Program": "/admin/program",
+  "Bildirimler": "/admin/bildirimler",
+  "Raporlar": "/admin/raporlar",
+  "Ayarlar": "/admin/ayarlar",
+};
+
 const statuses: ApplicationStatus[] = [
   "Yeni",
   "İnceleniyor",
@@ -162,6 +176,7 @@ function isThisWeek(date: string) {
 }
 
 export default function AdminPage() {
+  const router = useRouter();
   const [users, setUsers] = useState<AdminUser[]>(initialUsers);
   const [activeUser, setActiveUser] = useState<AdminUser | null>(null);
   const [loginError, setLoginError] = useState("");
@@ -430,7 +445,7 @@ export default function AdminPage() {
       <main className="min-h-screen bg-[#f6fbfc] px-6 py-10 text-slate-950">
         <section className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl items-center gap-10 lg:grid-cols-[.95fr_1.05fr]">
           <div>
-            <img src="/lidea-logo.svg" alt="Lidea" className="h-16 w-auto" />
+            <Image src="/lidea-logo.svg" alt="Lidea" width={180} height={64} className="h-16 w-auto" priority />
             <h1 className="mt-10 max-w-xl text-5xl font-black tracking-tight">
               Admin ve Program Yönetim Paneli
             </h1>
@@ -491,42 +506,11 @@ export default function AdminPage() {
               <button
                 key={item}
                 onClick={() => {
-              if (item === "Başvurular") {
-                window.location.href = "/admin/basvurular";
-                return;
-              }
-              if (item === "Girişimler") {
-                window.location.href = "/admin/girisimler";
-                return;
-              }
-              if (item === "Jüri") {
-                window.location.href = "/juri";
-                return;
-              }
-              if (item === "Değerlendiriciler") {
-                window.location.href = "/admin/degerlendiriciler";
-                return;
-              }
-              if (item === "Mentorlar") {
-                window.location.href = "/admin/mentorlar";
-                return;
-              }
-              if (item === "Program") {
-                window.location.href = "/admin/program";
-                return;
-              }
-              if (item === "Bildirimler") {
-                window.location.href = "/admin/bildirimler";
-                return;
-              }
-              if (item === "Raporlar") {
-                window.location.href = "/admin/raporlar";
-                return;
-              }
-              if (item === "Ayarlar") {
-                window.location.href = "/admin/ayarlar";
-                return;
-              }
+                  const route = menuRoutes[item];
+                  if (route) {
+                    router.push(route);
+                    return;
+                  }
                   setActiveMenu(item);
                 }}
                 className={`rounded-md px-3 py-2.5 text-left text-sm font-semibold transition ${
@@ -635,7 +619,7 @@ export default function AdminPage() {
                     </div>
                   <button
                     onClick={() => {
-                      window.location.href = "/admin/basvurular";
+                      router.push("/admin/basvurular");
                     }}
                       className="h-10 rounded-md bg-[#063f46] px-4 text-sm font-bold text-white"
                     >

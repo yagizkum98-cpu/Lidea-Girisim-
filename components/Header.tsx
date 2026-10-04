@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import ApplicationCta from "@/components/ApplicationCta";
 import ThemeSwitch from "@/components/ThemeSwitch";
 
@@ -7,10 +8,13 @@ export default function Header() {
     <header className="sticky top-0 z-50 border-b border-cyan-700/15 bg-[#eafff8]/80 shadow-[0_0_35px_rgba(23,230,210,.22)] backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
         <Link href="/" aria-label="Lidea ana sayfa" className="block shrink-0">
-          <img
+          <Image
             src="/lidea-logo.svg"
             alt="Lidea Yalın Idea Girişim Programı"
+            width={160}
+            height={48}
             className="h-12 w-auto"
+            priority
           />
         </Link>
         <nav className="hidden gap-7 text-sm font-semibold md:flex">

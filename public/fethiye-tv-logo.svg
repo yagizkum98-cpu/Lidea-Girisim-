@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470 170" role="img" aria-labelledby="title">
+  <title id="title">Fethiye TV</title>
+  <defs>
+    <linearGradient id="silver" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.48" stop-color="#d9dee0"/>
+      <stop offset="1" stop-color="#7d878b"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#e3062e" stroke-linecap="round">
+    <path d="M267 77c47-17 91-29 145-31 17 0 27 11 27 28v48c0 18-10 29-27 29-52-2-98-13-145-30" stroke-width="5"/>
+    <path d="M423 45c21 4 30 16 30 35v36c0 20-9 31-30 36" stroke-width="7"/>
+    <path d="m340 45-13-25m13 25 17-27" stroke-width="2"/>
+  </g>
+  <text x="14" y="105" fill="url(#silver)" stroke="#59666b" stroke-width="1.2" font-family="Trebuchet MS, Arial, Helvetica, sans-serif" font-size="76" letter-spacing="-4">Fethiye</text>
+  <rect x="16" y="119" width="104" height="39" rx="2" fill="#e3062e"/>
+  <rect x="21" y="124" width="94" height="29" rx="1" fill="none" stroke="#ffffff" stroke-width="1" opacity=".7"/>
+  <text x="68" y="151" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" text-anchor="middle">TV</text>
+</svg>

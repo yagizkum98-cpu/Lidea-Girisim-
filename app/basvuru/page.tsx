@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { FormEvent, useEffect, useState } from "react";
 import Header from "@/components/Header";
 import { addAdminActivity, normalizeApplication, readApplications, writeApplications } from "@/lib/applications";
@@ -137,10 +138,13 @@ export default function Apply() {
     <main>
       <Header />
       <div className="mx-auto max-w-3xl px-6 py-20">
-        <img
+        <Image
           src="/lidea-logo.svg"
           alt="Lidea Yalın Idea Girişim Programı"
+          width={256}
+          height={96}
           className="h-auto w-64 max-w-full"
+          priority
         />
         <h1 className="mt-8 text-5xl font-black">{program.period} Başvuru Formu</h1>
         <p className="mt-4 text-[#052f36]/65">
