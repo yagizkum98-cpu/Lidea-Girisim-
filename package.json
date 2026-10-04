@@ -2,6 +2,7 @@
   "name": "lidea-girisim-3-donem-mvp",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "npm@11.7.0",
   "scripts": {
     "dev": "next dev",
     "prebuild": "prisma generate",
