@@ -6,32 +6,32 @@ type CalendarMode = "pre" | "incubation" | "demoday";
 type Training = { date: string; time: string; trainer: string; title: string };
 
 const preIncubationTrainings: Training[] = [
-  { date: "22 Aralık 2025", time: "20.00 - 21.00", trainer: "Mine Dedekoca", title: "İş Modeli Şablonu" },
-  { date: "29 Aralık 2025", time: "20.00 - 21.00", trainer: "Rıza Güler", title: "Hedef Müşteri Analizi" },
-  { date: "05 Ocak 2026", time: "20.00 - 21.00", trainer: "Murat Nuri Avcı", title: "Değer Önerisi" },
-  { date: "12 Ocak 2026", time: "20.00 - 21.00", trainer: "Murat Özanlar", title: "Sorun ve Çözüm" },
-  { date: "19 Ocak 2026", time: "20.00 - 21.00", trainer: "Aziz Ahmedov", title: "Pazar Analizi ve Odaklanmış Giriş Pazarı" },
-  { date: "26 Ocak 2026", time: "20.00 - 21.00", trainer: "Mine Turalı", title: "Takım Kültürü ve Yönetimi" },
-  { date: "02 Şubat 2026", time: "20.00 - 21.00", trainer: "Altan Türel", title: "Tek Cümlelik İş Tanımı ve Özet İş Sunumu" },
-  { date: "09 Şubat 2026", time: "20.00 - 21.00", trainer: "Salime Funda Akçakaya Kılıç", title: "Maliyet ve Gelir Yapısı" },
-  { date: "16 Şubat 2026", time: "20.00 - 21.00", trainer: "Mahmut Dabbit", title: "İş Fikri Sunumu Eğitimi" },
-  { date: "20 Şubat 2026", time: "20.00 - 21.00", trainer: "Lidea", title: "Online Ön Kuluçka Demo Day" },
+  { date: "22 Aralık 2025", time: "20.00 - 21.00", trainer: "", title: "İş Modeli Şablonu" },
+  { date: "29 Aralık 2025", time: "20.00 - 21.00", trainer: "", title: "Hedef Müşteri Analizi" },
+  { date: "05 Ocak 2026", time: "20.00 - 21.00", trainer: "", title: "Değer Önerisi" },
+  { date: "12 Ocak 2026", time: "20.00 - 21.00", trainer: "", title: "Sorun & Çözüm" },
+  { date: "19 Ocak 2026", time: "20.00 - 21.00", trainer: "", title: "Pazar Analizi, Odaklanmış Giriş Pazarı" },
+  { date: "26 Ocak 2026", time: "20.00 - 21.00", trainer: "", title: "Takım Kültürü ve Yönetimi" },
+  { date: "02 Şubat 2026", time: "20.00 - 21.00", trainer: "", title: "Tek Cümlelik İş Tanımı, Özet İş Sunumu" },
+  { date: "09 Şubat 2026", time: "20.00 - 21.00", trainer: "", title: "Maliyet - Gelir Yapısı" },
+  { date: "16 Şubat 2026", time: "20.00 - 21.00", trainer: "", title: "İş Fikri Sunumu Eğitimi" },
+  { date: "20 Şubat 2026", time: "20.00 - 21.00", trainer: "", title: "ONLINE ÖN KULUÇKA DEMODAY" },
 ];
 
 const incubationTrainings: Training[] = [
-  { date: "09 Mart 2026", time: "20.00 - 22.00", trainer: "Lidea", title: "Tanışma" },
-  { date: "12 Mart 2026", time: "20.00 - 22.00", trainer: "Murat Özanlar", title: "Validasyon ve Doğrulama" },
-  { date: "16 Mart 2026", time: "20.00 - 22.00", trainer: "Rıza Gürler", title: "İş Modelleri" },
-  { date: "25 Mart 2026", time: "20.00 - 22.00", trainer: "Başak Kaftan", title: "Ürün, Girişim ve Ar-Ge" },
-  { date: "26 Mart 2026", time: "20.00 - 22.00", trainer: "Lütfi AyDeniz", title: "Pazar Analizi" },
-  { date: "30 Mart 2026", time: "20.00 - 22.00", trainer: "Emre Gökşin", title: "Satış ve Pazarlama" },
-  { date: "01 Nisan 2026", time: "20.00 - 22.00", trainer: "Altan Türel ve Mahmut Dabbit", title: "Yapay Zeka ile Prototip ve Pazarlama" },
-  { date: "06 Nisan 2026", time: "20.00 - 22.00", trainer: "Ercan Altuğ Yılmaz", title: "Girişimcilikte Oyunlaştırma" },
-  { date: "08 Nisan 2026", time: "20.00 - 22.00", trainer: "Okan Otuz", title: "Girişimcilik Ekosistem Fonları" },
-  { date: "13 Nisan 2026", time: "20.00 - 22.00", trainer: "Ufuk Batum", title: "Yatırımcı Bakışı ve Sunum Teknikleri" },
-  { date: "15 Nisan 2026", time: "20.00 - 22.00", trainer: "FarkLabs", title: "Finansal Hazırlık ve Metrikler" },
-  { date: "20 Nisan 2026", time: "20.00 - 22.00", trainer: "Gürbüz Sarı", title: "Fikri ve Sınai Mülkiyet ile Hukuk" },
-  { date: "21 Nisan - 01 Mayıs", time: "Program dahilinde", trainer: "Lidea Mentorları", title: "Demo Day Mentorluğu" },
+  { date: "09 Mart 2026", time: "20.00 - 22.00", trainer: "", title: "Tanışma" },
+  { date: "12 Mart 2026", time: "20.00 - 22.00", trainer: "", title: "Validasyon & Doğrulama" },
+  { date: "16 Mart 2026", time: "20.00 - 22.00", trainer: "", title: "İş Modelleri" },
+  { date: "25 Mart 2026", time: "20.00 - 22.00", trainer: "", title: "Ürün, Girişim ve Arge" },
+  { date: "26 Mart 2026", time: "20.00 - 22.00", trainer: "", title: "Pazar Analizi" },
+  { date: "30 Mart 2026", time: "20.00 - 22.00", trainer: "", title: "Satış, Pazarlama" },
+  { date: "01 Nisan 2026", time: "20.00 - 22.00", trainer: "", title: "Yapay Zeka ile Prototip ve Yapay Zeka ile Pazarlama" },
+  { date: "06 Nisan 2026", time: "20.00 - 22.00", trainer: "", title: "Girişimcilikte Oyunlaştırma" },
+  { date: "08 Nisan 2026", time: "20.00 - 22.00", trainer: "", title: "Girişimcilik Ekosistem Fonları" },
+  { date: "13 Nisan 2026", time: "20.00 - 22.00", trainer: "", title: "Yatırımcı Bakışı ve Sunum Teknikleri" },
+  { date: "15 Nisan 2026", time: "20.00 - 22.00", trainer: "", title: "Finansal Hazırlık ve Metrikler" },
+  { date: "20 Nisan 2026", time: "20.00 - 22.00", trainer: "", title: "Fikri Sinai Mülkiyet ve Hukuk" },
+  { date: "21 Nisan - 01 Mayıs", time: "Program dahilinde", trainer: "", title: "Demoday Mentorlüğü" },
 ];
 
 function TrainingGrid({ trainings }: { trainings: Training[] }) {
@@ -49,7 +49,7 @@ function TrainingGrid({ trainings }: { trainings: Training[] }) {
           </div>
           <h3 className="mt-8 text-2xl font-black leading-tight text-[#052f36]">{training.title}</h3>
           <div className="mt-8 border-t border-cyan-800/15 pt-4">
-            <p className="font-bold text-[#052f36]">{training.trainer}</p>
+            {training.trainer ? <p className="font-bold text-[#052f36]">{training.trainer}</p> : null}
             <p className="mt-1 text-sm text-[#052f36]/60">{training.time}</p>
           </div>
         </article>

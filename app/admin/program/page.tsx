@@ -68,8 +68,8 @@ const defaultProgram: Program = {
   applicationOpen: true,
   applicationStart: "",
   applicationDeadline: "",
-  programStart: "",
-  programEnd: "",
+  programStart: "2025-12-22",
+  programEnd: "2026-05-09",
   createdAt: new Date().toISOString(),
   applicationLimit: "Sınırsız",
   requiredStages: startupStages,
@@ -77,7 +77,38 @@ const defaultProgram: Program = {
   kvkkRequired: true,
 };
 
-const defaultStages: ProgramStage[] = [];
+const defaultStages: ProgramStage[] = [
+  {
+    id: "stage-pre-incubation",
+    programId: "program-3",
+    title: "Ön Kuluçka",
+    order: 1,
+    startDate: "2025-12-22",
+    endDate: "2026-02-20",
+    active: true,
+    description: "9 haftalık ön kuluçka eğitimleri.",
+  },
+  {
+    id: "stage-incubation",
+    programId: "program-3",
+    title: "Kuluçka",
+    order: 2,
+    startDate: "2026-03-02",
+    endDate: "2026-05-01",
+    active: true,
+    description: "8 haftalık kuluçka eğitimleri ve Demo Day mentorluğu.",
+  },
+  {
+    id: "stage-demoday",
+    programId: "program-3",
+    title: "Demo Day",
+    order: 3,
+    startDate: "2026-05-09",
+    endDate: "2026-05-09",
+    active: true,
+    description: "Lidea Demo Day, FKM Fethiye.",
+  },
+];
 
 const inputClass =
   "h-11 rounded-md border border-slate-200 bg-white px-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-cyan-600";

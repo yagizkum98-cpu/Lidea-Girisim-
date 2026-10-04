@@ -1,9 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
+import type { CSSProperties } from "react";
 import ApplicationCta from "@/components/ApplicationCta";
 import Header from "@/components/Header";
 import LideaCheckPublicAnnouncements from "@/components/LideaCheckPublicAnnouncements";
 import KeywordMarquee from "@/components/KeywordMarquee";
+import PreIncubationCountdown from "@/components/PreIncubationCountdown";
 import TrainingCalendar from "@/components/TrainingCalendar";
 
 const boardMembers = [
@@ -28,6 +30,20 @@ const timelineCards = [
   { title: "Ön Kuluçka", date: "22 Aralık - 20 Şubat", image: "/timeline-on-kulucka.png" },
   { title: "Kuluçka", date: "02 Mart - 01 Mayıs", image: "/timeline-kulucka.png" },
   { title: "Demo Day", date: "09 Mayıs 2026", image: "/timeline-demoday.png" },
+];
+
+const secondPeriodPhotos = [
+  { src: "/lidea-2-donem/01.jpg", title: "Lidea Girişim Programı ile Fethiye'de fikriniz uçuşa geçsin" },
+  { src: "/lidea-2-donem/02.jpg", title: "Kuluçka programı şehirleri" },
+  { src: "/lidea-2-donem/03.jpg", title: "Kuluçka programına geçen girişimler" },
+  { src: "/lidea-2-donem/04.jpg", title: "Demo Day sunumları" },
+  { src: "/lidea-2-donem/05.jpg", title: "Kuluçka programına seçilen girişimler" },
+  { src: "/lidea-2-donem/06.jpg", title: "Demo Day birincilik ödülü" },
+  { src: "/lidea-2-donem/07.jpg", title: "Demo Day ikincilik ödülü" },
+  { src: "/lidea-2-donem/08.jpg", title: "LİDER özel ödülü" },
+  { src: "/lidea-2-donem/09.jpg", title: "Lidea 2. dönem aile fotoğrafı" },
+  { src: "/lidea-2-donem/10.jpg", title: "WEFIGAMES özel ödülü" },
+  { src: "/lidea-2-donem/11.jpg", title: "2. dönem kapanış seçkisi" },
 ];
 
 const barcodeBars = [10, 3, 7, 4, 12, 5, 3, 9, 6, 14, 4, 8, 3, 11, 5, 7];
@@ -229,6 +245,79 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-7xl px-6 py-16">
+        <article
+          className="lidea-period-card overflow-hidden rounded-[1.75rem] border border-cyan-500/25 bg-[#041419] text-white shadow-[0_28px_90px_rgba(0,86,102,.28),0_0_42px_rgba(23,230,210,.24)]"
+          style={{ "--slide-count": secondPeriodPhotos.length } as CSSProperties}
+        >
+          <div className="grid gap-0 lg:grid-cols-[.72fr_1.28fr]">
+            <div className="relative flex min-h-[430px] flex-col justify-between overflow-hidden p-7 sm:p-9">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(23,230,210,.22),transparent_34%),radial-gradient(circle_at_84%_78%,rgba(138,214,111,.18),transparent_36%)]" />
+              <div className="absolute inset-y-0 right-0 w-px bg-white/10" />
+              <div className="relative">
+                <p className="text-sm font-black uppercase tracking-[.18em] text-[#17e6d2]">Arşiv</p>
+                <h2 className="mt-4 text-4xl font-black leading-tight md:text-5xl">
+                  2. Dönem Lidea Girişim Programı
+                </h2>
+                <p className="mt-5 max-w-md text-sm leading-7 text-white/68">
+                  Başvurudan Demo Day ödüllerine uzanan ikinci dönem yolculuğu.
+                </p>
+              </div>
+
+              <div className="relative mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {secondPeriodPhotos.map((photo, index) => (
+                  <div
+                    className="lidea-period-number rounded-md border border-white/12 bg-white/8 px-3 py-2"
+                    key={photo.src}
+                    style={
+                      {
+                        "--slide-index": index,
+                        "--slide-duration": "4s",
+                      } as CSSProperties
+                    }
+                  >
+                    <span className="block text-lg font-black tabular-nums">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="mt-1 block truncate text-[11px] font-bold text-white/54">
+                      {photo.title}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative min-h-[520px] bg-black/55 p-4 sm:p-6">
+              <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(23,230,210,.16),transparent_28%,rgba(138,214,111,.12)_78%,transparent)]" />
+              <div className="relative h-full min-h-[488px] overflow-hidden rounded-lg border border-white/10 bg-[#020607]">
+                {secondPeriodPhotos.map((photo, index) => (
+                  <figure
+                    className="lidea-period-slide absolute inset-0 bg-contain bg-center bg-no-repeat"
+                    key={photo.src}
+                    style={
+                      {
+                        "--slide-index": index,
+                        "--slide-duration": "4s",
+                        backgroundImage: `linear-gradient(135deg, rgba(23, 230, 210, .18), rgba(5, 47, 54, .12)), url('${photo.src}')`,
+                      } as CSSProperties
+                    }
+                  >
+                    <figcaption className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 bg-gradient-to-t from-black/82 via-black/45 to-transparent px-5 pb-5 pt-20">
+                      <span className="text-sm font-bold text-white/82">{photo.title}</span>
+                      <span className="rounded-full border border-white/20 bg-white/12 px-3 py-1 text-sm font-black tabular-nums text-white">
+                        {String(index + 1).padStart(2, "0")} / {String(secondPeriodPhotos.length).padStart(2, "0")}
+                      </span>
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <PreIncubationCountdown />
+
       <KeywordMarquee />
 
       <LideaCheckPublicAnnouncements />
@@ -403,45 +492,44 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="sss" className="mx-auto max-w-4xl px-6 py-24">
-        <h2 className="text-5xl font-black">Sık Sorulan Sorular</h2>
-        {[
-          {
-            question: "Lidea Girişim Programı nedir?",
-            answer: "Erken aşama fikirleri ön kuluçkada olgunlaştıran, gelişmiş girişimleri ise kuluçka döneminde büyüme ve yatırıma hazırlayan iki aşamalı bir programdır.",
-          },
-          {
-            question: "Kimler başvurabilir?",
-            answer: "İş fikrini geliştirmek veya mevcut girişimini büyütmek isteyen girişimciler programa başvurabilir.",
-          },
-          {
-            question: "Fikir aşamasında başvurabilir miyim?",
-            answer: "Evet. Ön kuluçka programı erken aşamadaki fikirlerin doğrulanması ve iş modeline dönüştürülmesi için tasarlanmıştır.",
-          },
-          {
-            question: "Tek başıma başvurabilir miyim?",
-            answer: "Evet. Başvuru formunda ekip büyüklüğünü bir kişi olarak belirterek bireysel başvuru yapabilirsiniz.",
-          },
-          {
-            question: "Ön kuluçka ne zaman?",
-            answer: "Ön kuluçka programı 22 Aralık - 20 Şubat tarihleri arasında, eğitimler saat 20.00'de gerçekleşir.",
-          },
-          {
-            question: "Kuluçka ne zaman?",
-            answer: "Kuluçka programı 02 Mart - 01 Mayıs tarihleri arasında, eğitimler saat 20.00'de gerçekleşir.",
-          },
-          {
-            question: "Demo Day ne zaman?",
-            answer: "Lidea Demo Day, 09 Mayıs 2026 tarihinde Fethiye'de düzenlenir.",
-          },
-        ].map((item) => (
-          <details className="border-b border-cyan-800/15 py-6" key={item.question}>
-            <summary className="cursor-pointer text-xl font-bold">{item.question}</summary>
-            <p className="pt-4 text-[#052f36]/65">
-              {item.answer}
+      <section id="sss" className="mx-auto max-w-7xl px-6 py-24">
+        <p className="font-bold text-[#0b7f5a]">BİLMENİZ GEREKEN HER ŞEY</p>
+        <div className="mt-3 grid gap-8 lg:grid-cols-[.82fr_1.18fr] lg:items-start">
+          <div>
+            <h2 className="text-5xl font-black tracking-tight">Sıkça Sorulan Sorular</h2>
+          </div>
+          <details className="rounded-lg border border-cyan-700/20 bg-white/45 p-6 shadow-[0_18px_55px_rgba(0,86,102,.12)] backdrop-blur" open>
+            <summary className="cursor-pointer text-2xl font-black">Lidea Girişim Programı Nedir ?</summary>
+            <p className="mt-5 text-lg leading-8 text-[#052f36]/65">
+              LIDEA, girişimcileri bölgesel ve ulusal düzeyde başarıya ulaştırmayı amaçlayarak, iş
+              dünyasında güçlü bir yer edinmelerine katkıda bulunur.
             </p>
           </details>
-        ))}
+        </div>
+
+        <div className="mt-16">
+          <p className="font-bold text-[#0b7f5a]">PROGRAM TERCİHLERİ</p>
+          <h3 className="mt-3 text-4xl font-black tracking-tight">Program Tercihleri</h3>
+          <div className="mt-8 grid gap-5 md:grid-cols-3">
+            {[
+              ["Ön Kuluçka", "22 Aralık - 20 Şubat | 20:00"],
+              ["Kuluçka", "02 Mart - 01 Mayıs | 20:00"],
+              ["Demoday", "09 Mayıs 2026"],
+            ].map(([title, date], index) => (
+              <article
+                className="relative min-h-52 overflow-hidden rounded-lg border border-cyan-600/20 bg-white/55 p-6 shadow-[0_18px_50px_rgba(0,86,102,.12)] backdrop-blur"
+                key={title}
+              >
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#00a6c8] via-[#17e6d2] to-[#8ad66f]" />
+                <p className="text-sm font-black text-[#00a6c8]">{String(index + 1).padStart(2, "0")}</p>
+                <h4 className="mt-8 text-3xl font-black text-[#052f36]">{title}</h4>
+                <p className="mt-6 rounded-md border border-cyan-700/15 bg-[#eafff8]/70 px-4 py-3 text-sm font-black text-[#0b7f5a]">
+                  {date}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
       </section>
 
       <section className="px-6 pb-24">
@@ -498,6 +586,9 @@ export default function Home() {
             ))}
           </div>
 
+          <p className="mt-8 text-center text-sm font-bold text-[#052f36]/60">
+            Telif Hakkı 2026 - Likya Idea Girişim Programı
+          </p>
         </div>
       </footer>
     </main>
