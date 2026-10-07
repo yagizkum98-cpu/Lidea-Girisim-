@@ -8,11 +8,14 @@ import {
   ApplicationStatus,
   ProgramTrack,
   addAdminActivity,
+  applicationFromApi,
+  mergeApplicationsFromApi,
   preEvaluationItems,
   readApplications,
   saveApplication,
 } from "@/lib/applications";
 import { readEvaluators } from "@/lib/evaluators";
+import { externalApplicationFields } from "@/lib/application-intake";
 import { readStartups, startupFromApplication, writeStartups } from "@/lib/startups";
 
 const inputClass =
@@ -29,6 +32,17 @@ export default function ApplicationDetailPage() {
     const applications = readApplications();
     setApplication(applications.find((item) => item.id === params.id) || null);
     setEvaluators(readEvaluators().filter((evaluator) => evaluator.status === "Aktif"));
+    let disposed = false;
+    void fetch(`/api/applications/${params.id}`, { cache: "no-store" }).then(async (response) => {
+      if (!response.ok) return;
+      const result = await response.json() as { application: Record<string, unknown> };
+      if (disposed) return;
+      const remote = applicationFromApi(result.application);
+      const cached = applications.find((item) => item.id === params.id);
+      const merged = mergeApplicationsFromApi([remote], cached ? [cached] : [])[0];
+      saveApplication(merged); setApplication(merged);
+    }).catch(() => { /* Retain the locally cached review if the service is unavailable. */ });
+    return () => { disposed = true; };
   }, [params.id]);
 
   function persist(nextApplication: Application, message: string) {
@@ -206,7 +220,7 @@ export default function ApplicationDetailPage() {
         </div>
 
         <div className="mt-6 flex flex-wrap gap-2">
-          {["Genel Bilgiler", "Girişim", "Ekip", "Belgeler", "Değerlendirme"].map((item) => (
+          {["Genel Bilgiler", "Girişim", "Ekip", "Belgeler", "Değerlendirme", ...(application.externalPayload ? ["Başvuru Formu"] : [])].map((item) => (
             <button
               key={item}
               onClick={() => setTab(item)}
@@ -228,6 +242,15 @@ export default function ApplicationDetailPage() {
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_340px]">
         <section className="rounded-lg border border-slate-200 bg-white p-6">
+          {tab === "Başvuru Formu" && application.externalPayload ? (
+            <dl className="divide-y divide-slate-200">
+              {Object.entries(externalApplicationFields).map(([key, label]) => {
+                const value = application.externalPayload?.[key];
+                const text = typeof value === "boolean" ? value ? "Evet" : "Hayır" : Array.isArray(value) ? value.join(", ") : value || "Belirtilmedi";
+                return <div key={key} className="py-4"><dt className="text-sm font-bold text-cyan-800">{label}</dt><dd className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-slate-700">{text}</dd></div>;
+              })}
+            </dl>
+          ) : null}
           {tab === "Genel Bilgiler" ? (
             <div className="grid gap-4 md:grid-cols-2">
               {[

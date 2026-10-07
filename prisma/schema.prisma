@@ -128,6 +128,8 @@ model Application {
   email          String
   phone          String?
   startupName    String
+  externalSource String?
+  externalPayload Json?
   sector         String
   city           String?
   district       String?

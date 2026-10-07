@@ -31,6 +31,8 @@ export type Application = {
   id: string;
   applicationNumber: string;
   programId: string;
+  externalSource?: string;
+  externalPayload?: Record<string, string | string[] | boolean>;
   founder: string;
   founderId: string;
   email: string;
@@ -178,6 +180,9 @@ export function normalizeApplication(raw: Partial<Application> & Record<string, 
     id,
     applicationNumber: String(raw.applicationNumber || id),
     programId: String(raw.programId || "program-3"),
+    externalSource: typeof raw.externalSource === "string" ? raw.externalSource : undefined,
+    externalPayload: raw.externalPayload && typeof raw.externalPayload === "object" && !Array.isArray(raw.externalPayload)
+      ? raw.externalPayload as Application["externalPayload"] : undefined,
     founder: String(raw.founder || ""),
     founderId: String(raw.founderId || ""),
     email: String(raw.email || ""),
@@ -260,6 +265,8 @@ export function mergeApplicationsFromApi(remote: Application[], local: Applicati
       ...item,
       ...existing,
       applicationNumber: item.applicationNumber,
+      externalSource: item.externalSource,
+      externalPayload: item.externalPayload,
       founder: item.founder,
       email: item.email,
       phone: item.phone,

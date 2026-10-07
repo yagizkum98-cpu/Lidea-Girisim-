@@ -13,6 +13,18 @@ const updateSchema = z.object({
   programTrack: z.enum(["Ön Kuluçka", "Kuluçka"]).optional(),
 });
 
+export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
+  try {
+    const user = await getAdminSessionUser();
+    if (!user) return unauthorized();
+    requirePermission(user.role, "applications:manage");
+    const { id } = await context.params;
+    const application = await db.application.findUnique({ where: { id }, include: { program: true, documents: true } });
+    if (!application) return NextResponse.json({ ok: false, error: "APPLICATION_NOT_FOUND" }, { status: 404 });
+    return NextResponse.json({ ok: true, application });
+  } catch (error) { return apiError(error); }
+}
+
 export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> },

@@ -61,11 +61,15 @@ export default function ApplicationsPage() {
       }
     };
     sync();
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") void sync();
+    }, 30_000);
     window.addEventListener("focus", sync);
     window.addEventListener("storage", sync);
     window.addEventListener("lidea-applications-updated", sync);
 
     return () => {
+      window.clearInterval(interval);
       window.removeEventListener("focus", sync);
       window.removeEventListener("storage", sync);
       window.removeEventListener("lidea-applications-updated", sync);

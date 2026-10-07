@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import { externalApplicationUrl } from "@/lib/application-intake";
 
 const programStorageKey = "lidea-program";
 
@@ -41,13 +41,16 @@ export default function ApplicationCta({
     };
   }, []);
 
+  if (!applicationOpen) return <span aria-disabled="true" className={className}>BAŞVURULAR SONA ERDİ</span>;
+
   return (
-    <Link
-      href="/basvuru"
-      aria-disabled={!applicationOpen}
+    <a
+      href={externalApplicationUrl}
+      target="_blank"
+      rel="noopener noreferrer"
       className={className}
     >
-      {applicationOpen ? openLabel : "BAŞVURULAR SONA ERDİ"}
-    </Link>
+      {openLabel}
+    </a>
   );
 }
