@@ -33,6 +33,7 @@ export type EntrepreneurTraining = {
 
 export type EntrepreneurWorkspace = {
   email: string;
+  startupId?: string;
   progress: number;
   pitchDeckStatus: string;
   nextStep: string;
@@ -137,16 +138,22 @@ export function findEntrepreneurApplication(email: string): Application | null {
 export function findEntrepreneurStartup(email: string) {
   syncAcceptedApplicationsToStartups();
   const application = findEntrepreneurApplication(email);
-  if (!application) return null;
-  return readStartups().find((startup) => startup.applicationId === application.id) || null;
+  const startups = readStartups();
+  const acceptedStartup = application ? startups.find((startup) => startup.applicationId === application.id) : null;
+  if (acceptedStartup) return acceptedStartup;
+  const workspace = readEntrepreneurWorkspace(email);
+  return startups.find((startup) => startup.id === workspace.startupId) || null;
 }
 
 export function createManualStartupForEntrepreneur(email: string, founder: string, name: string) {
   const startup = normalizeStartup({
-    id: `ST-MAN-${Date.now().toString().slice(-6)}`,
+    id: `ST-MAN-${crypto.randomUUID()}`,
     applicationId: "",
     programId: "program-3",
     name,
+    logo: "",
+    sector: "",
+    stage: "",
     founder,
     status: "Aktif",
     progress: 0,
@@ -156,7 +163,7 @@ export function createManualStartupForEntrepreneur(email: string, founder: strin
     notes: [],
   });
   saveStartup(startup);
-  saveEntrepreneurWorkspace({ ...emptyWorkspace(email), progress: 0 });
+  saveEntrepreneurWorkspace({ ...readEntrepreneurWorkspace(email), startupId: startup.id });
   return startup;
 }
 

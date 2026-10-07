@@ -32,6 +32,8 @@ import ProgramCalendar, { EventNotificationPreferences } from "@/components/Prog
 import { processEventReminders } from "@/lib/events";
 import NotificationInbox from "@/components/NotificationInbox";
 import TrainingCalendar from "@/components/TrainingCalendar";
+import StartupProfileEditor from "@/components/StartupProfileEditor";
+import { StartupProfilePatch } from "@/lib/validation/startup-profile";
 import { processLocalTrainingReminders } from "@/lib/local-trainings";
 import { Startup, getStartupProfileCompletion, normalizeStartup, saveStartup } from "@/lib/startups";
 
@@ -208,8 +210,6 @@ export default function EntrepreneurPanel() {
   }, [activeUser]);
 
   const meetings = useMemo(() => readEntrepreneurMeetings(startup), [startup]);
-  const profileCompletion = useMemo(() => getStartupProfileCompletion(startup), [startup]);
-  const progress = startup ? profileCompletion.percent : (workspace?.progress ?? 0);
   const applicationCompletion = useMemo(
     () => getApplicationSubmissionCompletion(application),
     [application],
@@ -256,30 +256,22 @@ export default function EntrepreneurPanel() {
     setNotice(message);
   }
 
-  function saveStartupProfile(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!startup) return;
-    const form = new FormData(event.currentTarget);
-    const nextStartup = {
-      ...startup,
-      name: String(form.get("name") || ""),
-      logo: String(form.get("logo") || ""),
-      website: String(form.get("website") || ""),
-      sector: String(form.get("sector") || ""),
-      stage: String(form.get("stage") || ""),
-      problem: String(form.get("problem") || ""),
-      solution: String(form.get("solution") || ""),
-      businessModel: String(form.get("businessModel") || ""),
-      traction: String(form.get("traction") || ""),
-      updatedAt: new Date().toISOString(),
-    };
-    const completedStartup = {
-      ...nextStartup,
-      progress: getStartupProfileCompletion(nextStartup).percent,
-    };
-    saveStartup(completedStartup);
+  async function saveStartupProfile(patch: StartupProfilePatch) {
+    if (!activeUser.localWorkspace) {
+      const response = await fetch("/api/entrepreneur/profile", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(patch) });
+      const result = await response.json() as { ok: boolean; error?: string };
+      if (!response.ok || !result.ok) throw new Error(result.error || "Profil kaydedilemedi.");
+      await syncForUser(activeUser);
+      setNotice("Girişim profili kaydedildi.");
+      return;
+    }
+    const base = startup || { ...createManualStartupForEntrepreneur(activeUser.email, activeUser.name, ""), logo: "", sector: "", stage: "" };
+    const nextStartup = { ...base, ...patch, updatedAt: new Date().toISOString() };
+    const completedStartup = { ...nextStartup, progress: getStartupProfileCompletion(nextStartup).percent };
+    try { saveStartup(completedStartup); }
+    catch { throw new Error("Tarayıcı depolama alanı dolu. Daha küçük bir logo yükleyin."); }
     setStartup(completedStartup);
-    setNotice("Girişim profili kaydedildi.");
+    setNotice("Girişim profili bu tarayıcıdaki çalışma alanına kaydedildi.");
   }
 
   function createManualStartup(event: FormEvent<HTMLFormElement>) {
@@ -443,52 +435,14 @@ export default function EntrepreneurPanel() {
               </section>
             ) : null}
 
-            <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="flex flex-wrap items-start justify-between gap-5">
-                <div>
-                  <p className="text-sm font-bold uppercase tracking-[.18em] text-cyan-700">Profil Tamamlama</p>
-                  <h2 className="mt-2 text-5xl font-black">%{progress}</h2>
-                </div>
-                <div className="rounded-md bg-slate-50 px-4 py-3 text-sm font-black text-slate-600">
-                  {profileCompletion.completedCount} / {profileCompletion.totalCount} alan dolu
-                </div>
-              </div>
-              <div className="mt-6 h-3 overflow-hidden rounded-full bg-slate-100">
-                <div className="h-full rounded-full bg-gradient-to-r from-[#063f46] via-cyan-600 to-[#8ad66f] transition-all" style={{ width: `${progress}%` }} />
-              </div>
-              <div className="mt-6 grid gap-3 md:grid-cols-5">
-                {profileCompletion.items.map((item, index) => (
-                  <div key={item.label} className={`rounded-md border p-4 ${item.completed ? "border-cyan-200 bg-cyan-50 text-cyan-950" : "border-slate-200 bg-slate-50 text-slate-500"}`}>
-                    <p className="text-xl font-black">{item.completed ? "✓" : index + 1}</p>
-                    <p className="mt-2 text-sm font-bold">{item.label}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
+            <StartupProfileEditor startup={startup} onSave={saveStartupProfile} />
 
             <section className="grid gap-6 xl:grid-cols-[1fr_360px]">
               <div className="space-y-6">
                 <section className="rounded-lg border border-slate-200 bg-white p-6">
                   <h2 className="text-xl font-black">Girişimim</h2>
                   {startup ? (
-                    <form onSubmit={saveStartupProfile} className="mt-5 grid gap-4">
-                      <div className="grid gap-4 md:grid-cols-3">
-                        <input name="name" defaultValue={startup.name} className={inputClass} placeholder="Girişim adı" />
-                        <input name="logo" defaultValue={startup.logo} className={inputClass} placeholder="Logo" />
-                        <input name="website" defaultValue={startup.website} className={inputClass} placeholder="Web sitesi" />
-                        <input name="sector" defaultValue={startup.sector} className={inputClass} placeholder="Sektör" />
-                        <input name="stage" defaultValue={startup.stage} className={inputClass} placeholder="Aşama" />
-                      </div>
-                      {[
-                        ["problem", "Problem", startup.problem],
-                        ["solution", "Çözüm", startup.solution],
-                        ["businessModel", "İş Modeli", startup.businessModel],
-                        ["traction", "Traction", startup.traction],
-                      ].map(([name, placeholder, value]) => (
-                        <textarea key={name} name={name} defaultValue={value} rows={3} className="rounded-md border border-slate-200 bg-white p-3 text-sm outline-none focus:border-cyan-600" placeholder={placeholder} />
-                      ))}
-                      <button className="h-11 rounded-md bg-[#063f46] px-5 text-sm font-bold text-white md:w-fit">Profili Kaydet</button>
-                    </form>
+                    <dl className="mt-5 grid gap-4 sm:grid-cols-2">{[["Girişim adı", startup.name], ["Kurucu", startup.founder], ["Sektör", startup.sector], ["Aşama", startup.stage], ["Web sitesi", startup.website]].map(([label, value]) => <div key={label} className="min-w-0"><dt className="text-xs font-semibold text-slate-500">{label}</dt><dd className="mt-1 break-words text-sm font-bold">{value || "—"}</dd></div>)}</dl>
                   ) : (
                     <p className="mt-4 rounded-md bg-slate-50 p-4 text-sm text-slate-500">Girişim profili için önce canlı veya manuel girişim kaydı gerekir.</p>
                   )}

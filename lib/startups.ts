@@ -158,10 +158,15 @@ export function startupFromApplication(application: Application) {
 
 export function getStartupProfileCompletion(startup: Startup | null) {
   const items = profileCompletionChecks.map((item) => {
-    if (!startup) return { label: item.label, completed: false };
+    if (!startup) return { key: item.key, label: item.label, completed: false };
     const value = startup[item.key];
-    const completed = Array.isArray(value) ? value.length > 0 : String(value || "").trim().length > 0;
-    return { label: item.label, completed };
+    const completed = item.key === "logo"
+      ? /^(data:image\/(png|jpeg);base64,|https?:\/\/|\/)/.test(String(value || ""))
+      : item.key === "name" ? Boolean(startup.name.trim() && startup.founder.trim())
+      : item.key === "stage" ? /^TRL [1-9]$/.test(String(value || ""))
+      : item.key === "sector" && value === "Belirtilmedi" ? false
+      : Array.isArray(value) ? value.some((member) => member.active && member.name.trim() && member.role.trim()) : String(value || "").trim().length > 0;
+    return { key: item.key, label: item.label, completed };
   });
   const completedCount = items.filter((item) => item.completed).length;
 
@@ -186,10 +191,10 @@ export function normalizeStartup(raw: Partial<Startup> & Record<string, unknown>
         : "",
     name,
     slug: String(raw.slug || slugify(name)),
-    logo: String(raw.logo || name.slice(0, 2).toUpperCase()),
+    logo: String(raw.logo ?? name.slice(0, 2).toUpperCase()),
     founder: String(raw.founder || ""),
-    sector: String(raw.sector || "Belirtilmedi"),
-    stage: String(raw.stage || "MVP"),
+    sector: String(raw.sector ?? "Belirtilmedi"),
+    stage: String(raw.stage ?? "MVP"),
     website: String(raw.website || ""),
     problem: String(raw.problem || ""),
     solution: String(raw.solution || ""),
