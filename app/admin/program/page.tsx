@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import ProgramCalendar from "@/components/ProgramCalendar";
 
 type ProgramStatus =
   | "Taslak"
@@ -171,6 +172,7 @@ function hasAdminSession() {
 
 export default function ProgramManagementPage() {
   const [authorized, setAuthorized] = useState(false);
+  const [adminEmail, setAdminEmail] = useState("admin@lideagirisim.com");
   const [tab, setTab] = useState("Genel");
   const [program, setProgram] = useState(defaultProgram);
   const [stages, setStages] = useState(defaultStages);
@@ -180,6 +182,16 @@ export default function ProgramManagementPage() {
     setAuthorized(hasAdminSession());
     setProgram(readProgram());
     setStages(readStages());
+    if (new URLSearchParams(window.location.search).has("etkinlik")) setTab("Takvim");
+    let disposed = false;
+    void fetch("/api/auth/admin", { cache: "no-store" }).then(async (response) => {
+      if (!response.ok) return;
+      const result = await response.json() as { user: { email: string; role: string } | null };
+      if (!disposed && result.user && ["SUPER_ADMIN", "PROGRAM_ADMIN"].includes(result.user.role)) {
+        setAuthorized(true); setAdminEmail(result.user.email);
+      }
+    }).catch(() => { /* Retain the existing local workspace session if the service is unavailable. */ });
+    return () => { disposed = true; };
   }, []);
 
   function saveProgram(nextProgram: Program, message = "Program bilgileri kaydedildi.") {
@@ -469,6 +481,8 @@ export default function ProgramManagementPage() {
             ) : null}
 
             {tab === "Takvim" ? (
+              <div className="space-y-6">
+              <ProgramCalendar admin email={adminEmail} />
               <section className="rounded-lg border border-slate-200 bg-white p-6">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <h2 className="text-xl font-black">Program Takvimi</h2>
@@ -517,6 +531,7 @@ export default function ProgramManagementPage() {
                   + Aşama Ekle
                 </button>
               </section>
+              </div>
             ) : null}
 
             {tab === "Başvuru Ayarları" ? (

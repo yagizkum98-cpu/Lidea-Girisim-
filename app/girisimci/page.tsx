@@ -27,7 +27,10 @@ import {
   getMentoringMetrics,
   saveMentorAction,
 } from "@/lib/mentors";
-import { Notification as PlatformNotification, normalizeNotification, readNotificationsForUser } from "@/lib/notifications";
+import { Notification as PlatformNotification, normalizeNotification, readNotificationsForUser, markLocalNotificationRead } from "@/lib/notifications";
+import ProgramCalendar, { EventNotificationPreferences } from "@/components/ProgramCalendar";
+import { processEventReminders } from "@/lib/events";
+import NotificationInbox from "@/components/NotificationInbox";
 import { Startup, getStartupProfileCompletion, normalizeStartup, saveStartup } from "@/lib/startups";
 
 type UserRole =
@@ -56,6 +59,7 @@ const menu = [
   "Girişimim",
   "Başvurum",
   "Programım",
+  "Takvim",
   "Eğitimler",
   "Mentorluk",
   "Dokümanlar",
@@ -91,9 +95,11 @@ export default function EntrepreneurPanel() {
   const [notifications, setNotifications] = useState<PlatformNotification[]>([]);
   const [mentorActions, setMentorActions] = useState<MentorAction[]>([]);
   const [activeMenu, setActiveMenu] = useState("Dashboard");
+  const [activeEventId, setActiveEventId] = useState("");
   const [notice, setNotice] = useState("");
 
   async function syncForUser(user: PortalUser) {
+    processEventReminders();
     if (user.role === "Girişimci" && !user.localWorkspace) {
       try {
         const response = await fetch("/api/entrepreneur/me", { cache: "no-store" });
@@ -122,7 +128,7 @@ export default function EntrepreneurPanel() {
             EVENT: "Etkinlik",
           };
           setNotifications(
-            result.notifications.map((item) =>
+            [...readNotificationsForUser(user.email, user.role).filter((item) => item.eventId), ...result.notifications.map((item) =>
               normalizeNotification({
                 ...item,
                 type: typeMap[String(item.type)] || "Duyuru",
@@ -141,7 +147,7 @@ export default function EntrepreneurPanel() {
                     })
                   : [],
               }),
-            ),
+            )],
           );
           setWorkspace(readEntrepreneurWorkspace(user.email));
           setProgramStages(readProgramStages());
@@ -163,6 +169,9 @@ export default function EntrepreneurPanel() {
   useEffect(() => {
     const sync = () => { void syncForUser(activeUser); };
     sync();
+    const eventId = new URLSearchParams(window.location.search).get("etkinlik");
+    if (eventId) { setActiveEventId(eventId); setActiveMenu("Takvim"); }
+    const reminderInterval = window.setInterval(() => processEventReminders(), 30_000);
     const events = [
       "storage",
       "focus",
@@ -175,7 +184,10 @@ export default function EntrepreneurPanel() {
       "lidea-mentor-actions-updated",
     ];
     events.forEach((event) => window.addEventListener(event, sync));
-    return () => events.forEach((event) => window.removeEventListener(event, sync));
+    return () => {
+      window.clearInterval(reminderInterval);
+      events.forEach((event) => window.removeEventListener(event, sync));
+    };
   }, []);
 
   const meetings = useMemo(() => readEntrepreneurMeetings(startup), [startup]);
@@ -211,6 +223,11 @@ export default function EntrepreneurPanel() {
       (item) => item.email.toLowerCase() === activeUser.email.toLowerCase(),
     );
     if (!recipient || recipient.read) return;
+    if (activeUser.localWorkspace || notification.eventId) {
+      markLocalNotificationRead(notification.id, activeUser.email);
+      await syncForUser(activeUser);
+      return;
+    }
     const response = await fetch(`/api/notifications/${notification.id}/read`, { method: "PATCH" });
     if (response.ok) await syncForUser(activeUser);
   }
@@ -381,6 +398,17 @@ export default function EntrepreneurPanel() {
 
           <div className="space-y-6 p-6">
             {notice ? <p className="rounded-md border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm font-bold text-cyan-900">{notice}</p> : null}
+
+            {activeMenu === "Takvim" ? (
+              <ProgramCalendar email={activeUser.email} initialEventId={activeEventId} />
+            ) : activeMenu === "Bildirimler" ? (
+              <NotificationInbox
+                notifications={notifications}
+                email={activeUser.email}
+                onRead={markNotificationRead}
+                onOpenEvent={(id) => { setActiveEventId(id); setActiveMenu("Takvim"); }}
+              />
+            ) : <>
 
             {!startup ? (
               <section className="rounded-lg border border-slate-200 bg-white p-6">
@@ -692,18 +720,23 @@ export default function EntrepreneurPanel() {
                         <button
                           type="button"
                           key={notification.id}
-                          onClick={() => markNotificationRead(notification)}
-                          className="w-full rounded-md border border-cyan-100 bg-cyan-50 p-3 text-left"
+                          onClick={() => {
+                            void markNotificationRead(notification);
+                            if (notification.eventId) { setActiveEventId(notification.eventId); setActiveMenu("Takvim"); }
+                          }}
+                          className={`w-full rounded-md border p-3 text-left ${notification.recipients.some((recipient) => recipient.email.toLowerCase() === activeUser.email.toLowerCase() && !recipient.read) ? "border-cyan-200 bg-cyan-50" : "border-slate-200 bg-white"}`}
                         >
                           <p className="text-sm font-black">{notification.title}</p>
                           <p className="mt-1 text-xs text-cyan-900">{notification.sentAt || notification.createdAt}</p>
                           <p className="mt-2 text-sm leading-6 text-slate-700">{notification.message}</p>
+                          {notification.eventId && <p className="mt-2 text-xs font-bold text-cyan-800">Etkinliği Görüntüle →</p>}
                         </button>
                       ))
                     ) : (
                       <p className="rounded-md bg-slate-50 p-3 text-sm text-slate-500">Henüz bildirim yok.</p>
                     )}
                   </div>
+                  <EventNotificationPreferences email={activeUser.email} />
                 </section>
 
                 <section className="rounded-lg border border-slate-200 bg-white p-5">
@@ -714,6 +747,7 @@ export default function EntrepreneurPanel() {
                 </section>
               </aside>
             </section>
+            </>}
           </div>
         </section>
       </div>

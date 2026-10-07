@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { EventNotificationPreferences } from "@/components/ProgramCalendar";
+import { processEventReminders } from "@/lib/events";
 import {
   Notification,
   NotificationAudience,
@@ -44,6 +46,7 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     const sync = async () => {
+      processEventReminders();
       const local = readNotifications();
       setNotifications(local);
       try {
@@ -64,7 +67,7 @@ export default function NotificationsPage() {
           FAILED: "Başarısız",
         };
         setNotifications(
-          result.notifications.map((item) =>
+          [...readNotifications().filter((item) => item.eventId), ...result.notifications.map((item) =>
             normalizeNotification({
               ...item,
               type: typeMap[String(item.type)] || "Duyuru",
@@ -83,18 +86,20 @@ export default function NotificationsPage() {
                   })
                 : [],
             }),
-          ),
+          )],
         );
       } catch {
         // Local drafts remain available if the database is temporarily offline.
       }
     };
     sync();
+    const interval = window.setInterval(() => processEventReminders(), 30_000);
     window.addEventListener("focus", sync);
     window.addEventListener("storage", sync);
     window.addEventListener("lidea-notifications-updated", sync);
 
     return () => {
+      window.clearInterval(interval);
       window.removeEventListener("focus", sync);
       window.removeEventListener("storage", sync);
       window.removeEventListener("lidea-notifications-updated", sync);
@@ -252,6 +257,7 @@ export default function NotificationsPage() {
         </aside>
 
         <section className="p-6">
+          <EventNotificationPreferences email="admin@lideagirisim.com" />
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-[.18em] text-cyan-700">
@@ -373,6 +379,7 @@ export default function NotificationsPage() {
                             <tr key={notification.id}>
                               <td className="px-5 py-4">
                                 <p className="font-black">{notification.title}</p>
+                                {notification.eventId && <Link href={`/admin/program?etkinlik=${encodeURIComponent(notification.eventId)}`} className="mt-2 inline-block text-xs font-bold text-cyan-700">Etkinliği Görüntüle →</Link>}
                                 <p className="mt-1 text-xs text-slate-400">{notification.type}</p>
                               </td>
                               <td className="px-5 py-4">{notification.audience}</td>

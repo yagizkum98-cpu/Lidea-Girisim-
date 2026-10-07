@@ -127,13 +127,13 @@ const steps = [
 
 export default function Home() {
   return (
-    <main>
+    <main className="fethiye-page">
       <Header />
       <section className="grid-bg min-h-[82vh] border-b border-cyan-700/15">
         <div className="mx-auto grid max-w-7xl gap-12 px-6 py-24 lg:grid-cols-[1fr_.7fr] lg:items-center">
           <div>
             <div className="mb-6 inline-flex rounded-full border border-cyan-600/25 bg-white/35 px-4 py-2 text-sm font-bold shadow-[0_0_22px_rgba(23,230,210,.25)]">
-              2026 • II. DÖNEM
+              2027 • III. DÖNEM
             </div>
             <h1 className="max-w-4xl text-6xl font-black leading-[.95] tracking-[-.06em] md:text-8xl">
               FİKRİNİ GELİŞTİR.
@@ -166,25 +166,16 @@ export default function Home() {
             </div>
           </div>
           <div
-            className="relative min-h-[520px] overflow-hidden rounded-[1.75rem] border border-cyan-200/30 bg-[#052f36] p-8 text-white shadow-[0_24px_80px_rgba(0,86,102,.28),0_0_42px_rgba(23,230,210,.32)]"
+            role="img"
+            aria-label="Lidea Girişim Programı III. Dönem ön kuluçka başvuru afişi: Fikrin Likya'dan kalkışa geçsin"
+            className="aspect-[1122/1402] w-full bg-[#052f36]"
             style={{
-              backgroundImage:
-                "linear-gradient(180deg, rgba(5, 47, 54, .2), rgba(5, 47, 54, .72)), url('/lidea-pegasus-mvp.png')",
+              backgroundImage: "url('/lidea-3-donem-afis.jpeg')",
               backgroundPosition: "center",
-              backgroundSize: "cover",
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
             }}
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(23,230,210,.18),transparent_42%)]" />
-            <div className="relative flex h-full min-h-[456px] flex-col justify-end">
-              <div className="text-7xl font-black drop-shadow-[0_0_20px_rgba(23,230,210,.65)]">
-                09
-              </div>
-              <div className="mt-2 text-3xl font-black drop-shadow-[0_0_16px_rgba(23,230,210,.75)]">
-                MAYIS 2026 • DEMO DAY
-              </div>
-              <div className="mt-8 h-2 rounded-full bg-gradient-to-r from-[#00a6c8] via-[#17e6d2] to-[#8ad66f] shadow-[0_0_28px_rgba(23,230,210,.7)]" />
-            </div>
-          </div>
+          />
         </div>
       </section>
 
@@ -505,8 +496,8 @@ export default function Home() {
         </div>
 
         <div className="mt-16">
-          <p className="font-bold text-[#0b7f5a]">PROGRAM TERCİHLERİ</p>
-          <h3 className="mt-3 text-4xl font-black tracking-tight">Program Tercihleri</h3>
+          <p className="font-bold text-[#0b7f5a]">PROGRAM TAKVİMİ</p>
+          <h3 className="mt-3 text-4xl font-black tracking-tight">Program Takvimi</h3>
           <div className="mt-8 grid gap-5 md:grid-cols-3">
             {[
               ["Ön Kuluçka", "22 Aralık - 20 Şubat | 20:00"],

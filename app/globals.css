@@ -221,6 +221,42 @@ html[data-theme="dark"] .keyword-marquee {
   background-size: 36px 36px;
 }
 
+.fethiye-page {
+  position: relative;
+  isolation: isolate;
+}
+
+.fethiye-page::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+  background-image:
+    linear-gradient(180deg, rgba(245, 253, 255, .65), rgba(245, 253, 255, .52) 55%, rgba(245, 253, 255, .72)),
+    url("/fethiye-lycia-motifs.png");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.fethiye-page > .grid-bg,
+html[data-theme="dark"] .fethiye-page > .grid-bg {
+  background: transparent;
+}
+
+html[data-theme="dark"] .fethiye-page::before {
+  background-image:
+    linear-gradient(180deg, rgba(2, 6, 7, .78), rgba(2, 6, 7, .62) 55%, rgba(2, 6, 7, .84)),
+    url("/fethiye-lycia-motifs.png");
+}
+
+@media (max-width: 767px) {
+  .fethiye-page::before {
+    background-position: 12% center;
+  }
+}
+
 .card {
   border: 1px solid rgba(0, 166, 200, .22);
   background: rgba(239, 255, 250, .76);

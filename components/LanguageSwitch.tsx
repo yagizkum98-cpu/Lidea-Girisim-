@@ -472,8 +472,8 @@ const extraDictionary: Record<string, string> = {
 };
 
 const fullSiteDictionary: Record<string, string> = {
-  "2026 • II. DÖNEM": "2026 • COHORT II",
-  "2026 II. DÖNEM": "2026 COHORT II",
+  "2027 • III. DÖNEM": "2027 • COHORT III",
+  "2027 III. DÖNEM": "2027 COHORT III",
   "09 MAYIS 2026 • DEMO DAY": "MAY 09, 2026 • DEMO DAY",
   "Fethiye'nin girişimcilik programında eğitim, mentorluk ve kaynak desteğiyle fikrini olgunlaştır; büyüme ve yatırım yolculuğuna hazırlan.": "Develop your idea through training, mentorship, and resources in Fethiye's entrepreneurship program; prepare for growth and investment.",
   "Fikir aşamasından yatırıma uzanan iki adımlı girişimcilik programı.": "A two-stage entrepreneurship program spanning from idea to investment.",

@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { clearSessionCookie, setSessionCookie } from "@/lib/auth";
+import { clearSessionCookie, getAdminSessionUser, setSessionCookie } from "@/lib/auth";
 import { db } from "@/lib/db";
 
 const defaultAdminEmail = "admin@lideagirisim.com";
 const defaultAdminPassword = "1234567890";
+
+export async function GET() {
+  const user = await getAdminSessionUser();
+  return NextResponse.json({ ok: Boolean(user), user: user ? { email: user.email, role: user.role } : null });
+}
 
 export async function POST(request: Request) {
   const body = await request.json();

@@ -25,6 +25,8 @@ export type NotificationRecipient = {
 
 export type Notification = {
   id: string;
+  eventId?: string;
+  eventCategory?: "invite" | "update" | "reminder" | "registration";
   title: string;
   message: string;
   type: NotificationType;
@@ -135,6 +137,8 @@ function uniqueRecipients(recipients: NotificationRecipient[]) {
 export function normalizeNotification(raw: Partial<Notification> & Record<string, unknown>) {
   return {
     id: String(raw.id || crypto.randomUUID()),
+    eventId: typeof raw.eventId === "string" ? raw.eventId : undefined,
+    eventCategory: raw.eventCategory as Notification["eventCategory"],
     title: String(raw.title || ""),
     message: String(raw.message || ""),
     type: (raw.type || "Duyuru") as NotificationType,
@@ -189,6 +193,14 @@ export function saveNotification(notification: Notification) {
       ? notifications.map((item) => (item.id === notification.id ? notification : item))
       : [notification, ...notifications],
   );
+}
+
+export function markLocalNotificationRead(id: string, email: string) {
+  writeNotifications(readNotifications().map((notification) => notification.id !== id ? notification : {
+    ...notification,
+    recipients: notification.recipients.map((recipient) => recipient.email.toLowerCase() !== email.toLowerCase()
+      ? recipient : { ...recipient, read: true, readAt: new Date().toISOString() }),
+  }));
 }
 
 export function readNotificationTemplates() {

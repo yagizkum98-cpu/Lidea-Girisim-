@@ -1,0 +1,71 @@
+import assert from "node:assert/strict";
+import { createRequire } from "node:module";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+const require = createRequire(import.meta.url);
+let playwright;
+try { playwright = require("playwright"); }
+catch { playwright = require(join(tmpdir(), "lidea-browser-tools/node_modules/playwright")); }
+const browser = await playwright.chromium.launch({ channel: "chrome", headless: true });
+const origin = process.env.LIDEA_TEST_URL || "http://localhost:3001";
+const errors = [];
+const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+try {
+  const admin = await context.newPage();
+  admin.on("pageerror", (error) => errors.push(error.message));
+  await admin.goto(`${origin}/admin/program`);
+  await admin.getByRole("button", { name: "Takvim", exact: true }).click();
+  await admin.getByRole("button", { name: "Yeni Etkinlik", exact: true }).click();
+  await admin.getByLabel("Etkinlik adı", { exact: true }).fill("Lidea ürün atölyesi");
+  await admin.getByLabel("Açıklama", { exact: true }).fill("Ürün, müşteri ve büyüme üzerine çalışma.");
+  await admin.getByLabel("Başlangıç", { exact: true }).fill("2030-01-10T12:00");
+  await admin.getByLabel("Bitiş", { exact: true }).fill("2030-01-10T13:00");
+  await admin.getByLabel("Toplantı bağlantısı", { exact: true }).fill("https://meet.google.com/old-link");
+  await admin.getByLabel("Davetli e-postaları", { exact: true }).fill("tester@lideagirisim.com");
+  await admin.getByRole("button", { name: "Yayımla ve Davet Et", exact: true }).click();
+  await admin.getByRole("region", { name: "Etkinlik takvimi" }).getByRole("button", { name: "Düzenle", exact: true }).waitFor();
+  const id = await admin.evaluate(() => JSON.parse(localStorage.getItem("lidea-events"))[0].id);
+  const founder = await context.newPage();
+  founder.on("pageerror", (error) => errors.push(error.message));
+  await founder.goto(`${origin}/girisimci`);
+  await founder.getByRole("button", { name: /^Bildirimler \(/ }).click();
+  await founder.getByRole("button", { name: "Etkinliği Görüntüle" }).click();
+  await founder.getByRole("button", { name: "Katılacağım", exact: true }).click();
+  await founder.getByRole("button", { name: "Toplantıya Katıl", exact: true }).waitFor();
+  await admin.getByText("Katılacak", { exact: true }).waitFor();
+  const downloadPromise = founder.waitForEvent("download");
+  await founder.getByRole("button", { name: "Takvime Ekle (.ics)", exact: true }).click();
+  assert.ok((await downloadPromise).suggestedFilename().endsWith(".ics"));
+  await admin.getByRole("region", { name: "Etkinlik takvimi" }).getByRole("button", { name: "Düzenle", exact: true }).click();
+  await admin.getByLabel("Toplantı bağlantısı", { exact: true }).fill("https://meet.google.com/new-link");
+  await admin.getByRole("button", { name: "Değişiklikleri Kaydet", exact: true }).click();
+  // Observe the popup without making requests to a real meeting provider.
+  await context.route("https://meet.google.com/**", (route) => route.fulfill({ status: 200, contentType: "text/html", body: "<h1>Test meeting</h1>" }));
+  const popupPromise = founder.waitForEvent("popup");
+  await founder.getByRole("button", { name: "Toplantıya Katıl", exact: true }).click();
+  const popup = await popupPromise;
+  await popup.waitForURL("https://meet.google.com/new-link");
+  await popup.close();
+  await founder.screenshot({ path: join(tmpdir(), "lidea-calendar-desktop.png"), fullPage: true });
+  await founder.setViewportSize({ width: 390, height: 844 });
+  await founder.getByRole("button", { name: "Ay", exact: true }).click();
+  await founder.getByRole("heading", { name: "Ocak 2030", exact: true }).waitFor();
+  await founder.screenshot({ path: join(tmpdir(), "lidea-calendar-mobile.png"), fullPage: true });
+  assert.equal(await founder.evaluate(() => document.documentElement.scrollWidth > window.innerWidth), false, "Mobile page must not overflow horizontally");
+  await founder.getByRole("button", { name: /^Bildirimler \(/ }).click();
+  await founder.getByRole("button", { name: "Tümünü Okundu İşaretle" }).click();
+  await founder.getByRole("button", { name: "Bildirimler (0)", exact: true }).waitFor();
+  await founder.reload();
+  await founder.getByRole("button", { name: "Bildirimler (0)", exact: true }).waitFor();
+  await founder.getByRole("button", { name: "Bildirimler (0)", exact: true }).click();
+  await founder.screenshot({ path: join(tmpdir(), "lidea-notifications-mobile.png"), fullPage: true });
+  admin.once("dialog", (dialog) => dialog.accept());
+  await admin.getByRole("button", { name: "Etkinliği İptal Et", exact: true }).click();
+  await founder.goto(`${origin}/girisimci?etkinlik=${id}`);
+  await founder.getByText("Çevrim içi · İptal edildi", { exact: true }).waitFor();
+  assert.equal(await founder.getByRole("button", { name: "Toplantıya Katıl", exact: true }).count(), 0);
+  assert.deepEqual(errors, [], "Panels should not raise browser errors");
+  console.log("PASS: publish, invite, RSVP, host synchronization, calendar download, updated join link, read persistence, cancellation, desktop/mobile and browser errors.");
+  console.log(`Screenshots: ${join(tmpdir(), "lidea-calendar-desktop.png")}, ${join(tmpdir(), "lidea-calendar-mobile.png")}, ${join(tmpdir(), "lidea-notifications-mobile.png")}`);
+} finally { await context.close(); await browser.close(); }
