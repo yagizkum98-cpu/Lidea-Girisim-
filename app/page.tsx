@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import LideaCheckPublicAnnouncements from "@/components/LideaCheckPublicAnnouncements";
 import KeywordMarquee from "@/components/KeywordMarquee";
 import PreIncubationCountdown from "@/components/PreIncubationCountdown";
+import DemoDayBroadcasts from "@/components/DemoDayBroadcasts";
 
 const boardMembers = [
   {
@@ -316,6 +317,8 @@ export default function Home() {
           </div>
         </article>
       </section>
+
+      <DemoDayBroadcasts />
 
       <PreIncubationCountdown />
 
