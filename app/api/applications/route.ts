@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { apiError, unauthorized } from "@/lib/api";
-import { getSessionUser } from "@/lib/auth";
+import { getAdminSessionUser } from "@/lib/auth";
 import { requirePermission } from "@/lib/permissions";
 import { db } from "@/lib/db";
 import { listApplications } from "@/lib/services/applications-service";
@@ -9,7 +9,7 @@ import bcrypt from "bcryptjs";
 
 export async function GET() {
   try {
-    const user = await getSessionUser();
+    const user = await getAdminSessionUser();
     if (!user) return unauthorized();
     requirePermission(user.role, "applications:manage");
     const applications = await listApplications();

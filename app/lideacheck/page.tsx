@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { readAdminUsers, AdminUserRecord } from "@/lib/settings";
 import { syncAcceptedApplicationsToStartups, Startup } from "@/lib/startups";
 import {
   AttendanceRecord,
@@ -18,52 +17,20 @@ import {
   writeDemoDayCandidates,
 } from "@/lib/lideacheck";
 
-type CheckUser = AdminUserRecord & { role: string };
-
-const sessionKey = "lidea-check-session";
-const allowedRoles = ["Süper Admin", "Yoklama Yetkilisi"];
-
-const initialUsers: CheckUser[] = [
-  {
-    name: "Süper Admin",
-    email: "admin@lideagirisim.com",
-    password: "",
-    role: "Süper Admin",
-    status: "Aktif",
-  },
-];
-
 const inputClass =
   "h-11 rounded-md border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-cyan-600";
-
-function readCheckUsers() {
-  const users = readAdminUsers();
-  return users.length ? users : initialUsers;
-}
 
 function getStartupName(startups: Startup[], startupId: string) {
   return startups.find((startup) => startup.id === startupId)?.name || "Girişim";
 }
 
 export default function LideaCheckPage() {
-  const [activeUser, setActiveUser] = useState<CheckUser | null>(null);
-  const [loginError, setLoginError] = useState("");
   const [notice, setNotice] = useState("");
   const [startups, setStartups] = useState<Startup[]>([]);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [demoDay, setDemoDay] = useState<DemoDayCandidate[]>([]);
 
   useEffect(() => {
-    const savedSession = window.localStorage.getItem(sessionKey);
-    if (savedSession) {
-      try {
-        const sessionUser = JSON.parse(savedSession) as CheckUser;
-        if (allowedRoles.includes(sessionUser.role)) setActiveUser(sessionUser);
-      } catch {
-        window.localStorage.removeItem(sessionKey);
-      }
-    }
-
     const sync = () => {
       setStartups(syncAcceptedApplicationsToStartups());
       setAttendance(readAttendanceRecords());
@@ -91,34 +58,6 @@ export default function LideaCheckPage() {
   ];
   const activeDemoDayList = demoDay.filter((candidate) => candidate.status !== "Reddedildi");
   const rejectedDemoDayList = demoDay.filter((candidate) => candidate.status === "Reddedildi");
-
-  function login(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const email = String(form.get("email") || "").trim().toLowerCase();
-    const password = String(form.get("password") || "");
-    const user = readCheckUsers().find(
-      (item) =>
-        item.email.toLowerCase() === email &&
-        item.password === password &&
-        allowedRoles.includes(item.role) &&
-        item.status !== "Pasif",
-    );
-
-    if (!user) {
-      setLoginError("Bu panele sadece Süper Admin veya tanımlı Yoklama Yetkilisi giriş yapabilir.");
-      return;
-    }
-
-    window.localStorage.setItem(sessionKey, JSON.stringify(user));
-    setActiveUser(user);
-    setLoginError("");
-  }
-
-  function logout() {
-    window.localStorage.removeItem(sessionKey);
-    setActiveUser(null);
-  }
 
   function createAttendance(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -194,29 +133,6 @@ export default function LideaCheckPage() {
     setNotice(status === "Reddedildi" ? "Girişim reddedilenler tarafına alındı ve stant mesajı oluşturuldu." : "Girişim Demo Day listesinde onaylandı.");
   }
 
-  if (!activeUser) {
-    return (
-      <main className="min-h-screen bg-[#f6fbfc] px-6 py-10 text-slate-950">
-        <div className="mx-auto max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-[0_22px_70px_rgba(0,86,102,.12)]">
-          <Link href="/" className="text-sm font-black text-cyan-800">← Ana sayfa</Link>
-          <p className="mt-8 text-xs font-bold uppercase tracking-[.18em] text-cyan-700">LideaCheck</p>
-          <h1 className="mt-2 text-3xl font-black">Akıllı Yoklama Paneli</h1>
-          <p className="mt-3 text-sm leading-6 text-slate-500">
-            Süper Admin ve ayarlardan tanımlanan Yoklama Yetkilisi dışında giriş kapalıdır.
-          </p>
-          {loginError ? <p className="mt-5 rounded-md bg-red-50 px-4 py-3 text-sm font-bold text-red-700">{loginError}</p> : null}
-          <form onSubmit={login} className="mt-6 grid gap-3">
-            <input name="email" type="email" className={inputClass} placeholder="E-posta" />
-            <input name="password" type="password" className={inputClass} placeholder="Şifre" />
-            <button className="h-11 rounded-md bg-[#063f46] px-5 text-sm font-bold text-white">
-              Panele Gir
-            </button>
-          </form>
-        </div>
-      </main>
-    );
-  }
-
   return (
     <main className="min-h-screen bg-[#f6fbfc] text-slate-950">
       <header className="border-b border-slate-200 bg-white">
@@ -226,10 +142,9 @@ export default function LideaCheckPage() {
             <h1 className="mt-1 text-3xl font-black">Akıllı Yoklama Paneli</h1>
           </div>
           <div className="flex items-center gap-3">
-            <p className="text-sm font-bold text-slate-500">{activeUser.name} · {activeUser.role}</p>
-            <button onClick={logout} className="h-10 rounded-md border border-slate-200 bg-white px-4 text-sm font-bold">
-              Çıkış
-            </button>
+            <Link href="/" className="flex h-10 items-center rounded-md border border-slate-200 bg-white px-4 text-sm font-bold">
+              Ana sayfa
+            </Link>
           </div>
         </div>
       </header>

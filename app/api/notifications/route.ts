@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { apiError, unauthorized } from "@/lib/api";
-import { getSessionUser } from "@/lib/auth";
+import { getAdminSessionUser } from "@/lib/auth";
 import { requirePermission } from "@/lib/permissions";
 import { createPlatformNotification } from "@/lib/services/notifications-service";
 import { createNotificationSchema } from "@/lib/validation/platform";
 
 export async function GET() {
   try {
-    const user = await getSessionUser();
+    const user = await getAdminSessionUser();
     if (!user) return unauthorized();
     requirePermission(user.role, "notifications:send");
     const notifications = await (await import("@/lib/db")).db.notification.findMany({
@@ -22,7 +22,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const user = await getSessionUser();
+    const user = await getAdminSessionUser();
     if (!user) return unauthorized();
     requirePermission(user.role, "notifications:send");
     const parsed = createNotificationSchema.safeParse(await req.json());

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { apiError, unauthorized } from "@/lib/api";
-import { getSessionUser } from "@/lib/auth";
+import { getAdminSessionUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/permissions";
 import { acceptApplication } from "@/lib/services/applications-service";
@@ -18,7 +18,7 @@ export async function PATCH(
   context: { params: Promise<{ id: string }> },
 ) {
   try {
-    const user = await getSessionUser();
+    const user = await getAdminSessionUser();
     if (!user) return unauthorized();
     requirePermission(user.role, "applications:manage");
 

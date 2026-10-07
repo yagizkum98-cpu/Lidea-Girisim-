@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { apiError, unauthorized } from "@/lib/api";
-import { getSessionUser } from "@/lib/auth";
+import { getAdminSessionUser } from "@/lib/auth";
 import { requirePermission } from "@/lib/permissions";
 import { db } from "@/lib/db";
 import { createProgramSchema } from "@/lib/validation/platform";
@@ -19,7 +19,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const user = await getSessionUser();
+    const user = await getAdminSessionUser();
     if (!user) return unauthorized();
     requirePermission(user.role, "program:manage");
     const parsed = createProgramSchema.safeParse(await req.json());

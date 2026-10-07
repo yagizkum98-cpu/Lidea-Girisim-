@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   Application,
@@ -47,8 +48,6 @@ type PortalUser = {
   localWorkspace?: boolean;
 };
 
-const usersStorageKey = "lidea-admin-users";
-const entrepreneurSessionKey = "lidea-entrepreneur-session";
 const inputClass =
   "h-11 rounded-md border border-slate-200 bg-white px-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-cyan-600";
 
@@ -82,22 +81,9 @@ const fallbackUsers: PortalUser[] = [
   },
 ];
 
-function getUsers() {
-  if (typeof window === "undefined") return fallbackUsers;
-  const raw = window.localStorage.getItem(usersStorageKey);
-  if (!raw) return fallbackUsers;
-
-  try {
-    const users = JSON.parse(raw) as PortalUser[];
-    const tester = fallbackUsers[0];
-    return [...users.filter((user) => user.email.toLowerCase() !== tester.email), tester];
-  } catch {
-    return fallbackUsers;
-  }
-}
+const activeUser = fallbackUsers[0];
 
 export default function EntrepreneurPanel() {
-  const [activeUser, setActiveUser] = useState<PortalUser | null>(null);
   const [application, setApplication] = useState<Application | null>(null);
   const [startup, setStartup] = useState<Startup | null>(null);
   const [workspace, setWorkspace] = useState<EntrepreneurWorkspace | null>(null);
@@ -105,7 +91,6 @@ export default function EntrepreneurPanel() {
   const [notifications, setNotifications] = useState<PlatformNotification[]>([]);
   const [mentorActions, setMentorActions] = useState<MentorAction[]>([]);
   const [activeMenu, setActiveMenu] = useState("Dashboard");
-  const [loginError, setLoginError] = useState("");
   const [notice, setNotice] = useState("");
 
   async function syncForUser(user: PortalUser) {
@@ -176,23 +161,8 @@ export default function EntrepreneurPanel() {
   }
 
   useEffect(() => {
-    const sessionEmail = window.localStorage.getItem(entrepreneurSessionKey);
-    const sessionUser = getUsers().find((user) => user.email === sessionEmail);
-    if (sessionUser && ["Girişimci", "Süper Admin", "Admin", "Program Yetkilisi"].includes(sessionUser.role)) {
-      setActiveUser(sessionUser);
-      syncForUser(sessionUser);
-    } else if (sessionEmail) {
-      const entrepreneur = { name: sessionEmail.split("@")[0], email: sessionEmail, role: "Girişimci" as const };
-      setActiveUser(entrepreneur);
-      syncForUser(entrepreneur);
-    }
-
-    const sync = () => {
-      const email = window.localStorage.getItem(entrepreneurSessionKey);
-      const currentUser = getUsers().find((user) => user.email === email);
-      if (currentUser) syncForUser(currentUser);
-      else if (email) syncForUser({ name: email.split("@")[0], email, role: "Girişimci" });
-    };
+    const sync = () => { void syncForUser(activeUser); };
+    sync();
     const events = [
       "storage",
       "focus",
@@ -234,53 +204,6 @@ export default function EntrepreneurPanel() {
       ).length,
     0,
   );
-
-  async function login(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const email = String(form.get("email") || "").trim().toLowerCase();
-    const password = String(form.get("password") || "");
-    const user = getUsers().find(
-      (item) => item.email.toLowerCase() === email && item.password === password && item.status !== "Pasif",
-    );
-
-    try {
-      const response = await fetch("/api/auth/entrepreneur", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      if (response.ok) {
-        const result = (await response.json()) as { user: PortalUser };
-        window.localStorage.setItem(entrepreneurSessionKey, result.user.email);
-        setActiveUser(result.user);
-        await syncForUser(result.user);
-        setLoginError("");
-        return;
-      }
-    } catch {
-      // Local admin login remains available while the database is offline.
-    }
-
-    if (!user || !["Girişimci", "Süper Admin", "Admin", "Program Yetkilisi"].includes(user.role)) {
-      setLoginError("Bu panele giriş için admin tarafından tanımlanmış girişimci hesabı gerekir.");
-      return;
-    }
-
-    window.localStorage.setItem(entrepreneurSessionKey, user.email);
-    setActiveUser(user);
-    syncForUser(user);
-    setLoginError("");
-  }
-
-  async function logout() {
-    await fetch("/api/auth/entrepreneur", { method: "DELETE" });
-    window.localStorage.removeItem(entrepreneurSessionKey);
-    setActiveUser(null);
-    setApplication(null);
-    setStartup(null);
-    setWorkspace(null);
-  }
 
   async function markNotificationRead(notification: PlatformNotification) {
     if (!activeUser) return;
@@ -420,37 +343,6 @@ export default function EntrepreneurPanel() {
     setNotice("Mentor aksiyonu tamamlandı.");
   }
 
-  if (!activeUser) {
-    return (
-      <main className="min-h-screen bg-[#f6fbfc] px-6 py-10 text-slate-950">
-        <section className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl items-center gap-10 lg:grid-cols-[1fr_.9fr]">
-          <div>
-            <Image src="/lidea-logo.svg" alt="Lidea" width={180} height={64} className="h-16 w-auto" priority />
-            <h1 className="mt-10 max-w-xl text-5xl font-black tracking-tight">Girişimci Paneli</h1>
-            <p className="mt-5 max-w-lg text-lg leading-8 text-slate-600">
-              Admin tarafından tanımlanan girişimci hesabıyla program durumunuzu, başvurunuzu,
-              mentorluğu, dokümanları ve bildirimleri canlı takip edin.
-            </p>
-          </div>
-          <form onSubmit={login} className="rounded-lg border border-slate-200 bg-white p-8 shadow-[0_24px_70px_rgba(15,23,42,.08)]">
-            <p className="text-sm font-bold uppercase tracking-[.18em] text-cyan-700">Yetkili Giriş</p>
-            <h2 className="mt-3 text-3xl font-black">Tanımlı girişimci hesabı</h2>
-            <label className="mt-8 block text-sm font-bold">
-              E-posta
-              <input name="email" type="email" className={`${inputClass} mt-2 w-full`} />
-            </label>
-            <label className="mt-4 block text-sm font-bold">
-              Şifre
-              <input name="password" type="password" className={`${inputClass} mt-2 w-full`} />
-            </label>
-            {loginError ? <p className="mt-4 rounded-md bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{loginError}</p> : null}
-            <button className="mt-6 h-12 w-full rounded-md bg-[#063f46] px-5 font-bold text-white">Giriş Yap</button>
-          </form>
-        </section>
-      </main>
-    );
-  }
-
   return (
     <main className="min-h-screen bg-[#f6fbfc] text-slate-950">
       <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
@@ -483,7 +375,7 @@ export default function EntrepreneurPanel() {
                 <p className="text-sm font-black">{activeUser.name}</p>
                 <p className="text-xs text-slate-500">{activeUser.email}</p>
               </div>
-              <button onClick={logout} className="h-10 rounded-md border border-slate-200 bg-white px-4 text-sm font-bold">Çıkış</button>
+              <Link href="/" className="flex h-10 items-center rounded-md border border-slate-200 bg-white px-4 text-sm font-bold">Ana sayfa</Link>
             </div>
           </header>
 

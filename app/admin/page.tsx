@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
@@ -58,7 +58,6 @@ type Activity = {
 };
 
 const usersStorageKey = "lidea-admin-users";
-const sessionKey = "lidea-admin-session";
 const announcementsStorageKey = "lidea-announcements";
 const applicationsStorageKey = "lidea-applications";
 const activitiesStorageKey = "lidea-admin-activities";
@@ -183,8 +182,7 @@ function isThisWeek(date: string) {
 export default function AdminPage() {
   const router = useRouter();
   const [users, setUsers] = useState<AdminUser[]>(initialUsers);
-  const [activeUser, setActiveUser] = useState<AdminUser | null>(null);
-  const [loginError, setLoginError] = useState("");
+  const [activeUser, setActiveUser] = useState<AdminUser>(initialUsers[0]);
   const [activeMenu, setActiveMenu] = useState("Dashboard");
   const [applications, setApplications] = useState<Application[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -206,10 +204,6 @@ export default function AdminPage() {
     const storedUsers = readUsers();
     setUsers(storedUsers);
     window.localStorage.setItem(usersStorageKey, JSON.stringify(storedUsers));
-
-    const sessionEmail = window.localStorage.getItem(sessionKey);
-    const sessionUser = storedUsers.find((user) => user.email === sessionEmail);
-    if (sessionUser) setActiveUser(sessionUser);
 
     setApplications(readApplications());
     setActivities(readActivities());
@@ -261,40 +255,6 @@ export default function AdminPage() {
     setApplications(nextApplications);
     window.localStorage.setItem(applicationsStorageKey, JSON.stringify(nextApplications));
     window.dispatchEvent(new Event("lidea-applications-updated"));
-  }
-
-  async function login(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const email = String(form.get("email") || "").trim().toLowerCase();
-    const password = String(form.get("password") || "");
-    const user = users.find((item) => item.email.toLowerCase() === email);
-
-    if (!user) {
-      setLoginError("E-posta veya şifre hatalı.");
-      return;
-    }
-
-    const response = await fetch("/api/auth/admin", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!response.ok) {
-      setLoginError("Sunucu oturumu açılamadı. Yönetici bilgilerini kontrol edin.");
-      return;
-    }
-
-    window.localStorage.setItem(sessionKey, user.email);
-    setActiveUser(user);
-    setLoginError("");
-  }
-
-  async function logout() {
-    await fetch("/api/auth/admin", { method: "DELETE" });
-    window.localStorage.removeItem(sessionKey);
-    setActiveUser(null);
   }
 
   function moveApplication(id: string, status: ApplicationStatus) {
@@ -445,60 +405,6 @@ export default function AdminPage() {
   const uniqueOptions = (key: keyof Application) =>
     Array.from(new Set(applications.map((item) => String(item[key])).filter(Boolean)));
 
-  if (!activeUser) {
-    return (
-      <main className="min-h-screen bg-[#f6fbfc] px-6 py-10 text-slate-950">
-        <section className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl items-center gap-10 lg:grid-cols-[.95fr_1.05fr]">
-          <div>
-            <Image src="/lidea-logo.svg" alt="Lidea" width={180} height={64} className="h-16 w-auto" priority />
-            <h1 className="mt-10 max-w-xl text-5xl font-black tracking-tight">
-              Admin ve Program Yönetim Paneli
-            </h1>
-            <p className="mt-5 max-w-lg text-lg leading-8 text-slate-600">
-              Canlı başvuruları, yetkilileri, duyuruları ve program operasyonunu tek merkezden
-              yönetin.
-            </p>
-          </div>
-
-          <form
-            onSubmit={login}
-            className="rounded-lg border border-slate-200 bg-white p-8 shadow-[0_24px_70px_rgba(15,23,42,.08)]"
-          >
-            <p className="text-sm font-bold uppercase tracking-[.18em] text-cyan-700">
-              Güvenli Giriş
-            </p>
-            <h2 className="mt-3 text-3xl font-black">Yönetici hesabı</h2>
-            <label className="mt-8 block text-sm font-bold">
-              E-posta
-              <input
-                name="email"
-                type="email"
-                defaultValue="admin@lideagirisim.com"
-                className={`${inputClass} mt-2 w-full`}
-              />
-            </label>
-            <label className="mt-4 block text-sm font-bold">
-              Şifre
-              <input
-                name="password"
-                type="password"
-                className={`${inputClass} mt-2 w-full`}
-              />
-            </label>
-            {loginError ? (
-              <p className="mt-4 rounded-md bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
-                {loginError}
-              </p>
-            ) : null}
-            <button className="mt-6 h-12 w-full rounded-md bg-[#063f46] px-5 font-bold text-white">
-              Giriş Yap
-            </button>
-          </form>
-        </section>
-      </main>
-    );
-  }
-
   return (
     <main className="min-h-screen bg-[#f6fbfc] text-slate-950">
       <div className="grid min-h-screen lg:grid-cols-[240px_1fr]">
@@ -528,12 +434,9 @@ export default function AdminPage() {
               </button>
             ))}
             <div className="my-3 border-t border-slate-200" />
-            <button
-              onClick={logout}
-              className="rounded-md px-3 py-2.5 text-left text-sm font-semibold text-slate-600 hover:bg-slate-100"
-            >
-              ⇥ Çıkış
-            </button>
+            <Link href="/" className="rounded-md px-3 py-2.5 text-left text-sm font-semibold text-slate-600 hover:bg-slate-100">
+              Ana sayfa
+            </Link>
           </nav>
         </aside>
 

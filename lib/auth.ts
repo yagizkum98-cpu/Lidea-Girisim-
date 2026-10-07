@@ -2,6 +2,16 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { AppRole } from "@/lib/permissions";
 
+// Temporary open access for admin operations while panel login is disabled.
+export async function getAdminSessionUser(): Promise<SessionUser> {
+  return {
+    id: "platform-super-admin",
+    email: process.env.ADMIN_EMAIL || "admin@lideagirisim.com",
+    name: "Super Admin",
+    role: "SUPER_ADMIN",
+  };
+}
+
 export type SessionUser = {
   id: string;
   email: string;

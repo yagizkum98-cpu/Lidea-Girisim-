@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { apiError, unauthorized } from "@/lib/api";
-import { getSessionUser } from "@/lib/auth";
+import { getAdminSessionUser } from "@/lib/auth";
 import { requirePermission } from "@/lib/permissions";
 import { assignEvaluator } from "@/lib/services/applications-service";
 import { assignEvaluatorSchema } from "@/lib/validation/platform";
 
 export async function POST(req: Request) {
   try {
-    const user = await getSessionUser();
+    const user = await getAdminSessionUser();
     if (!user) return unauthorized();
     requirePermission(user.role, "applications:manage");
     const parsed = assignEvaluatorSchema.safeParse(await req.json());
