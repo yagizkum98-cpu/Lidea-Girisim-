@@ -8,7 +8,9 @@ export default function ThemeSwitch() {
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
-    setTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+    const savedTheme = window.localStorage.getItem("lidea-theme") === "dark" ? "dark" : "light";
+    setTheme(savedTheme);
+    document.documentElement.dataset.theme = savedTheme;
   }, []);
 
   function selectTheme(nextTheme: Theme) {

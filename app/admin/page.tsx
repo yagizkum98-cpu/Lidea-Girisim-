@@ -67,7 +67,7 @@ const initialUsers: AdminUser[] = [
   {
     name: "Süper Admin",
     email: "admin@lideagirisim.com",
-    password: "",
+    password: "1234567890",
     role: "Süper Admin",
   },
 ];
@@ -122,13 +122,18 @@ const selectClass =
 const inputClass =
   "h-11 rounded-md border border-slate-200 bg-white px-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-cyan-600";
 
-function readUsers() {
+function readUsers(): AdminUser[] {
   if (typeof window === "undefined") return initialUsers;
   const saved = window.localStorage.getItem(usersStorageKey);
   if (!saved) return initialUsers;
 
   try {
-    return JSON.parse(saved) as AdminUser[];
+    const savedUsers = JSON.parse(saved) as AdminUser[];
+    return savedUsers.map((user): AdminUser =>
+      user.email.toLowerCase() === "admin@lideagirisim.com" && !user.password
+        ? { ...user, password: "1234567890", role: "Süper Admin" }
+        : user,
+    );
   } catch {
     return initialUsers;
   }

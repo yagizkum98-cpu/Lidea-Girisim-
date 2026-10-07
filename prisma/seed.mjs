@@ -1,25 +1,31 @@
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 
+process.loadEnvFile?.();
+
 const prisma = new PrismaClient();
 
-const defaultPassword = process.env.SEED_DEFAULT_PASSWORD;
-
-if (!defaultPassword) {
-  throw new Error("SEED_DEFAULT_PASSWORD must be set before seeding.");
-}
+const adminEmail = process.env.ADMIN_EMAIL || "admin@lideagirisim.com";
+const adminPassword = process.env.ADMIN_PASSWORD || "1234567890";
+const defaultPassword = process.env.SEED_DEFAULT_PASSWORD || adminPassword;
 
 async function main() {
   const passwordHash = await bcrypt.hash(defaultPassword, 10);
+  const adminPasswordHash = await bcrypt.hash(adminPassword, 10);
 
   const [admin, evaluator, mentor, jury] = await Promise.all([
     prisma.user.upsert({
-      where: { email: "admin@lidea.local" },
-      update: {},
+      where: { email: adminEmail },
+      update: {
+        name: "Super Admin",
+        passwordHash: adminPasswordHash,
+        role: "SUPER_ADMIN",
+        active: true,
+      },
       create: {
-        name: "Lidea Admin",
-        email: "admin@lidea.local",
-        passwordHash,
+        name: "Super Admin",
+        email: adminEmail,
+        passwordHash: adminPasswordHash,
         role: "SUPER_ADMIN",
       },
     }),
@@ -198,7 +204,8 @@ async function main() {
     },
   });
 
-  console.log(`Seed completed. Login users use password: ${defaultPassword}`);
+  console.log(`Seed completed. Admin login: ${adminEmail} / ${adminPassword}`);
+  console.log(`Demo users use password: ${defaultPassword}`);
 }
 
 main()

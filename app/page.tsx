@@ -6,7 +6,6 @@ import Header from "@/components/Header";
 import LideaCheckPublicAnnouncements from "@/components/LideaCheckPublicAnnouncements";
 import KeywordMarquee from "@/components/KeywordMarquee";
 import PreIncubationCountdown from "@/components/PreIncubationCountdown";
-import TrainingCalendar from "@/components/TrainingCalendar";
 
 const boardMembers = [
   {
@@ -471,8 +470,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      <TrainingCalendar />
 
       <section id="surec" className="bg-[#052f36] text-white shadow-[0_0_70px_rgba(0,166,200,.25)_inset]">
         <div className="mx-auto max-w-7xl px-6 py-24">
