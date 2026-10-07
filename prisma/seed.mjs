@@ -12,6 +12,24 @@ const defaultPassword = process.env.SEED_DEFAULT_PASSWORD || adminPassword;
 async function main() {
   const passwordHash = await bcrypt.hash(defaultPassword, 10);
   const adminPasswordHash = await bcrypt.hash(adminPassword, 10);
+  const testerPasswordHash = await bcrypt.hash("1234567890", 10);
+
+  await prisma.user.upsert({
+    where: { email: "tester@lideagirisim.com" },
+    update: {
+      name: "Tester",
+      passwordHash: testerPasswordHash,
+      role: "ENTREPRENEUR",
+      active: true,
+    },
+    create: {
+      id: "platform-test-entrepreneur",
+      name: "Tester",
+      email: "tester@lideagirisim.com",
+      passwordHash: testerPasswordHash,
+      role: "ENTREPRENEUR",
+    },
+  });
 
   const [admin, evaluator, mentor, jury] = await Promise.all([
     prisma.user.upsert({

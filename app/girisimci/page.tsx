@@ -44,6 +44,7 @@ type PortalUser = {
   password?: string;
   role: UserRole;
   status?: string;
+  localWorkspace?: boolean;
 };
 
 const usersStorageKey = "lidea-admin-users";
@@ -67,6 +68,13 @@ const menu = [
 
 const fallbackUsers: PortalUser[] = [
   {
+    name: "Tester",
+    email: "tester@lideagirisim.com",
+    password: "1234567890",
+    role: "Girişimci",
+    localWorkspace: true,
+  },
+  {
     name: "Süper Admin",
     email: "admin@lideagirisim.com",
     password: "",
@@ -80,7 +88,9 @@ function getUsers() {
   if (!raw) return fallbackUsers;
 
   try {
-    return JSON.parse(raw) as PortalUser[];
+    const users = JSON.parse(raw) as PortalUser[];
+    const tester = fallbackUsers[0];
+    return [...users.filter((user) => user.email.toLowerCase() !== tester.email), tester];
   } catch {
     return fallbackUsers;
   }
@@ -99,7 +109,7 @@ export default function EntrepreneurPanel() {
   const [notice, setNotice] = useState("");
 
   async function syncForUser(user: PortalUser) {
-    if (user.role === "Girişimci") {
+    if (user.role === "Girişimci" && !user.localWorkspace) {
       try {
         const response = await fetch("/api/entrepreneur/me", { cache: "no-store" });
         if (response.ok) {

@@ -8,6 +8,16 @@ export async function GET() {
     const user = await getSessionUser();
     if (!user || user.role !== "ENTREPRENEUR") return unauthorized();
 
+    if (user.id === "platform-test-entrepreneur") {
+      return NextResponse.json({
+        ok: true,
+        user: { name: user.name, email: user.email, role: "Girişimci", localWorkspace: true },
+        application: null,
+        startup: null,
+        notifications: [],
+      });
+    }
+
     const application = await db.application.findFirst({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
