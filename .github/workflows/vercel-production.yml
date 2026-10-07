@@ -1,0 +1,39 @@
+name: Deploy Vercel Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vercel-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VERCEL_ORG_ID: team_Gjairtxw5uragTb3eDLRtYkA
+      VERCEL_PROJECT_ID: prj_wVjDcCFimmz8N0fajwEEcezxFmQX
+      VERCEL_TOKEN: ${{ secrets.LIDEA_VERCEL_DEPLOY_TOKEN }}
+    steps:
+      - name: Check deployment credentials
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::Add LIDEA_VERCEL_DEPLOY_TOKEN in repository Actions secrets."
+            exit 1
+          fi
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Vercel CLI
+        run: npm install --global vercel@62.7.0
+      - name: Deploy to production
+        run: vercel deploy --prod --yes --token="$VERCEL_TOKEN"
