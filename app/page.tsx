@@ -27,12 +27,6 @@ const boardMembers = [
   },
 ];
 
-const timelineCards = [
-  { title: "Ön Kuluçka", date: "22 Aralık - 20 Şubat", image: "/timeline-on-kulucka.png" },
-  { title: "Kuluçka", date: "02 Mart - 01 Mayıs", image: "/timeline-kulucka.png" },
-  { title: "Demo Day", date: "09 Mayıs 2026", image: "/timeline-demoday.png" },
-];
-
 const secondPeriodPhotos = [
   { src: "/lidea-2-donem/01.jpg", title: "Lidea Girişim Programı ile Fethiye'de fikriniz uçuşa geçsin" },
   { src: "/lidea-2-donem/02.jpg", title: "Kuluçka programı şehirleri" },
@@ -46,8 +40,6 @@ const secondPeriodPhotos = [
   { src: "/lidea-2-donem/10.jpg", title: "WEFIGAMES özel ödülü" },
   { src: "/lidea-2-donem/11.jpg", title: "2. dönem kapanış seçkisi" },
 ];
-
-const barcodeBars = [10, 3, 7, 4, 12, 5, 3, 9, 6, 14, 4, 8, 3, 11, 5, 7];
 
 const benefits = [
   { title: "9 Haftalık Ön Kuluçka", description: "İş fikrini doğrulama ve iş modelini olgunlaştırma odaklı eğitim dönemi." },
@@ -178,62 +170,6 @@ export default function Home() {
               backgroundRepeat: "no-repeat",
             }}
           />
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 py-16">
-        <div className="grid gap-5 md:grid-cols-3">
-          {timelineCards.map((card, index) => {
-            const hasImage = Boolean(card.image);
-
-            return (
-            <article
-              className={`group relative min-h-[210px] overflow-hidden rounded-[1.75rem] border border-cyan-500/25 p-6 shadow-[0_24px_70px_rgba(0,86,102,.16),0_0_34px_rgba(23,230,210,.2)] backdrop-blur ${
-                hasImage ? "bg-[#170b45] text-white" : "bg-white/45"
-              }`}
-              style={
-                hasImage
-                  ? {
-                      backgroundImage: `linear-gradient(90deg, rgba(10, 5, 36, .82), rgba(18, 8, 58, .5)), url('${card.image}')`,
-                      backgroundPosition: "center",
-                      backgroundSize: "cover",
-                    }
-                  : undefined
-              }
-              key={card.title}
-            >
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#00a6c8] via-[#17e6d2] to-[#8ad66f] shadow-[0_0_24px_rgba(23,230,210,.85)]" />
-              <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-[#17e6d2]/20 blur-2xl transition group-hover:bg-[#8ad66f]/25" />
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className={hasImage ? "text-sm font-black text-[#8ad66f]" : "text-sm font-black text-[#00a6c8]/75"}>0{index + 1}</p>
-                  <h2 className={hasImage ? "mt-7 text-3xl font-black uppercase text-white" : "mt-7 text-3xl font-black uppercase text-[#052f36]"}>
-                    {card.title}
-                  </h2>
-                </div>
-                <div className={hasImage ? "rounded-2xl border border-white/20 bg-white/15 px-3 py-2 backdrop-blur" : "rounded-2xl border border-cyan-700/15 bg-white/50 px-3 py-2"}>
-                  <div className="flex h-14 items-end gap-[3px]">
-                    {barcodeBars.map((height, barIndex) => (
-                      <span
-                        className={hasImage ? "block w-[3px] rounded-full bg-white" : "block w-[3px] rounded-full bg-[#063f46]"}
-                        style={{ height: `${height * 4}px` }}
-                        key={`${card.title}-${barIndex}`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className={hasImage ? "mt-10 rounded-2xl border border-white/20 bg-white/15 px-4 py-3 backdrop-blur" : "mt-10 rounded-2xl border border-cyan-700/15 bg-[#eafff8]/70 px-4 py-3"}>
-                <p className={hasImage ? "text-xs font-bold uppercase tracking-[.2em] text-[#8ad66f]" : "text-xs font-bold uppercase tracking-[.2em] text-[#0b7f5a]"}>
-                  Tarih
-                </p>
-                <p className={hasImage ? "mt-1 text-xl font-black text-white" : "mt-1 text-xl font-black text-[#052f36]"}>
-                  {card.date}
-                </p>
-              </div>
-            </article>
-            );
-          })}
         </div>
       </section>
 
@@ -501,29 +437,6 @@ export default function Home() {
           </details>
         </div>
 
-        <div className="mt-16">
-          <p className="font-bold text-[#0b7f5a]">PROGRAM TAKVİMİ</p>
-          <h3 className="mt-3 text-4xl font-black tracking-tight">Program Takvimi</h3>
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
-            {[
-              ["Ön Kuluçka", "22 Aralık - 20 Şubat | 20:00"],
-              ["Kuluçka", "02 Mart - 01 Mayıs | 20:00"],
-              ["Demoday", "09 Mayıs 2026"],
-            ].map(([title, date], index) => (
-              <article
-                className="relative min-h-52 overflow-hidden rounded-lg border border-cyan-600/20 bg-white/55 p-6 shadow-[0_18px_50px_rgba(0,86,102,.12)] backdrop-blur"
-                key={title}
-              >
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#00a6c8] via-[#17e6d2] to-[#8ad66f]" />
-                <p className="text-sm font-black text-[#00a6c8]">{String(index + 1).padStart(2, "0")}</p>
-                <h4 className="mt-8 text-3xl font-black text-[#052f36]">{title}</h4>
-                <p className="mt-6 rounded-md border border-cyan-700/15 bg-[#eafff8]/70 px-4 py-3 text-sm font-black text-[#0b7f5a]">
-                  {date}
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
       </section>
 
       <section className="px-6 pb-24">
