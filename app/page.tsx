@@ -7,6 +7,7 @@ import LideaCheckPublicAnnouncements from "@/components/LideaCheckPublicAnnounce
 import KeywordMarquee from "@/components/KeywordMarquee";
 import PreIncubationCountdown from "@/components/PreIncubationCountdown";
 import DemoDayBroadcasts from "@/components/DemoDayBroadcasts";
+import PublicTrainingSchedule from "@/components/PublicTrainingSchedule";
 
 const boardMembers = [
   {
@@ -30,17 +31,6 @@ const timelineCards = [
   { title: "Ön Kuluçka", date: "22 Aralık - 20 Şubat", image: "/timeline-on-kulucka.png" },
   { title: "Kuluçka", date: "02 Mart - 01 Mayıs", image: "/timeline-kulucka.png" },
   { title: "Demo Day", date: "09 Mayıs 2026", image: "/timeline-demoday.png" },
-];
-
-const preIncubationTrainings = [
-  { date: "2026-11-02", dateLabel: "02 Kasım 2026", day: "Pazartesi", week: "1. Hafta", title: "Ekip Tanışma ve Problem Seçimi" },
-  { date: "2026-11-04", dateLabel: "04 Kasım 2026", day: "Çarşamba", week: "2. Hafta", title: "Müşteri Keşfi / The Mom Test" },
-  { date: "2026-11-11", dateLabel: "11 Kasım 2026", day: "Çarşamba", week: "3. Hafta", title: "Çözüm Daraltma ve Konsept Testi" },
-  { date: "2026-11-18", dateLabel: "18 Kasım 2026", day: "Çarşamba", week: "4. Hafta", title: "İş Modeli, Fiyat ve Pazar" },
-  { date: "2026-11-25", dateLabel: "25 Kasım 2026", day: "Çarşamba", week: "5. Hafta", title: "İlk Temas ve Ölçeklenmeyen Erişim" },
-  { date: "2026-12-02", dateLabel: "02 Aralık 2026", day: "Çarşamba", week: "6. Hafta", title: "Öğrenme Panosu ve Anlatıya Hazırlık" },
-  { date: "2026-12-09", dateLabel: "09 Aralık 2026", day: "Çarşamba", week: "7. Hafta", title: "Şirket Zamanlaması, BİGG ve KOSGEB" },
-  { date: "2026-12-16", dateLabel: "16 Aralık 2026", day: "Çarşamba", week: "8. Hafta", title: "3 Dakika Anlatı Mimarisi, Q&A ve Dayanıklılık" },
 ];
 
 const secondPeriodPhotos = [
@@ -476,42 +466,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="takvim" aria-labelledby="training-calendar-title" className="scroll-mt-24 border-y border-cyan-700/15 bg-white/35">
-        <div className="mx-auto max-w-7xl px-6 py-16">
-          <p className="text-sm font-bold text-[#0b7f5a]">Eğitimler</p>
-          <div className="mt-3 flex flex-wrap items-end justify-between gap-5">
-            <div>
-              <h2 id="training-calendar-title" className="text-4xl font-black">Eğitim Takvimi</h2>
-              <p className="mt-3 text-lg font-semibold text-[#052f36]">Girişimcilik Programı</p>
-            </div>
-            <div className="border-l-2 border-[#0b7f5a] pl-4">
-              <p className="font-bold text-[#0b7f5a]">Ön Kuluçka</p>
-              <p className="mt-1 text-sm text-[#052f36]">02 Kasım – 19 Aralık 2026</p>
-            </div>
-          </div>
-          <div className="mt-8 grid items-stretch gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {preIncubationTrainings.map((training) => (
-              <article key={training.date} aria-labelledby={`training-${training.date}`} className="flex min-w-0 flex-col rounded-lg border border-cyan-700/20 bg-white/80 p-5">
-                <div className="flex flex-wrap items-center justify-between gap-2 text-sm font-bold">
-                  <p className="text-[#0b7f5a]">{training.week}</p>
-                  <p className="text-[#052f36]">{training.day}</p>
-                </div>
-                <time dateTime={training.date} className="mt-3 text-sm font-semibold text-[#052f36]">{training.dateLabel}</time>
-                <h3 id={`training-${training.date}`} className="mt-5 break-words text-xl font-bold leading-7 text-[#052f36]">{training.title}</h3>
-              </article>
-            ))}
-            <article aria-labelledby="training-demo-day" className="flex min-w-0 flex-col rounded-lg border border-[#0b7f5a]/30 bg-[#052f36] p-5 text-white">
-              <div className="flex flex-wrap items-center justify-between gap-2 text-sm font-bold">
-                <span aria-hidden="true" className="text-2xl">🏆</span>
-                <p>Cumartesi</p>
-              </div>
-              <time dateTime="2026-12-19" className="mt-3 text-sm font-semibold">19 Aralık 2026</time>
-              <h3 id="training-demo-day" className="mt-5 text-2xl font-black leading-7">DEMO DAY</h3>
-              <p className="mt-3 text-sm text-[#8ad66f]">Ön Kuluçka</p>
-            </article>
-          </div>
-        </div>
-      </section>
+      <PublicTrainingSchedule />
 
       <section id="surec" className="bg-[#052f36] text-white shadow-[0_0_70px_rgba(0,166,200,.25)_inset]">
         <div className="mx-auto max-w-7xl px-6 py-24">

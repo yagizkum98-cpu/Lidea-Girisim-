@@ -311,7 +311,28 @@ model Training {
   title       String
   description String?
   startsAt    DateTime
+  endsAt      DateTime?
+  timeConfirmed Boolean @default(false)
+  week        Int?
+  mode        String @default("online")
+  meetingUrl  String?
+  status      String @default("scheduled")
+  reminderMinutes Int[] @default([1440, 60, 10])
+  adminReminders Boolean @default(true)
+  hostEmail   String?
+  followers   TrainingFollow[]
   location    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+}
+
+model TrainingFollow {
+  id          String @id @map("_id")
+  trainingId  String
+  training    Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  email       String
+  following   Boolean @default(true)
+  joinedAt    DateTime?
   createdAt   DateTime @default(now())
 }
 
@@ -356,6 +377,7 @@ model Notification {
   id          String                  @id @default(cuid()) @map("_id")
   title       String
   message     String
+  trainingId  String?
   type        NotificationType
   status      NotificationStatus      @default(DRAFT)
   scheduledAt DateTime?

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import ProgramCalendar from "@/components/ProgramCalendar";
+import TrainingCalendar from "@/components/TrainingCalendar";
 
 type ProgramStatus =
   | "Taslak"
@@ -173,6 +174,7 @@ function hasAdminSession() {
 export default function ProgramManagementPage() {
   const [authorized, setAuthorized] = useState(false);
   const [adminEmail, setAdminEmail] = useState("admin@lideagirisim.com");
+  const [adminLocalWorkspace, setAdminLocalWorkspace] = useState(true);
   const [tab, setTab] = useState("Genel");
   const [program, setProgram] = useState(defaultProgram);
   const [stages, setStages] = useState(defaultStages);
@@ -183,12 +185,15 @@ export default function ProgramManagementPage() {
     setProgram(readProgram());
     setStages(readStages());
     if (new URLSearchParams(window.location.search).has("etkinlik")) setTab("Takvim");
+    if (new URLSearchParams(window.location.search).has("egitim")) setTab("Eğitim Takvimi");
     let disposed = false;
     void fetch("/api/auth/admin", { cache: "no-store" }).then(async (response) => {
       if (!response.ok) return;
-      const result = await response.json() as { user: { email: string; role: string } | null };
-      if (!disposed && result.user && ["SUPER_ADMIN", "PROGRAM_ADMIN"].includes(result.user.role)) {
-        setAuthorized(true); setAdminEmail(result.user.email);
+      const result = await response.json() as { user: { email: string; role: string } | null; localWorkspace?: boolean };
+      if (!disposed && result.user) {
+        const allowed = ["SUPER_ADMIN", "PROGRAM_ADMIN"].includes(result.user.role);
+        setAuthorized(allowed);
+        if (allowed) { setAdminEmail(result.user.email); setAdminLocalWorkspace(Boolean(result.localWorkspace)); }
       }
     }).catch(() => { /* Retain the existing local workspace session if the service is unavailable. */ });
     return () => { disposed = true; };
@@ -389,7 +394,7 @@ export default function ProgramManagementPage() {
             </section>
 
             <div className="flex flex-wrap gap-2 rounded-lg border border-slate-200 bg-white p-2">
-              {["Genel", "Takvim", "Başvuru Ayarları", "Aşamalar"].map((item) => (
+              {["Genel", "Takvim", "Eğitim Takvimi", "Başvuru Ayarları", "Aşamalar"].map((item) => (
                 <button
                   key={item}
                   onClick={() => setTab(item)}
@@ -479,6 +484,8 @@ export default function ProgramManagementPage() {
                 </div>
               </form>
             ) : null}
+
+            {tab === "Eğitim Takvimi" ? <TrainingCalendar admin email={adminEmail} localWorkspace={adminLocalWorkspace} /> : null}
 
             {tab === "Takvim" ? (
               <div className="space-y-6">

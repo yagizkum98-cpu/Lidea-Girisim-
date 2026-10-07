@@ -31,6 +31,8 @@ import { Notification as PlatformNotification, normalizeNotification, readNotifi
 import ProgramCalendar, { EventNotificationPreferences } from "@/components/ProgramCalendar";
 import { processEventReminders } from "@/lib/events";
 import NotificationInbox from "@/components/NotificationInbox";
+import TrainingCalendar from "@/components/TrainingCalendar";
+import { processLocalTrainingReminders } from "@/lib/local-trainings";
 import { Startup, getStartupProfileCompletion, normalizeStartup, saveStartup } from "@/lib/startups";
 
 type UserRole =
@@ -60,7 +62,7 @@ const menu = [
   "Başvurum",
   "Programım",
   "Takvim",
-  "Eğitimler",
+  "Eğitim Takvimi",
   "Mentorluk",
   "Dokümanlar",
   "Pitch Deck",
@@ -85,9 +87,10 @@ const fallbackUsers: PortalUser[] = [
   },
 ];
 
-const activeUser = fallbackUsers[0];
+const fallbackActiveUser = fallbackUsers[0];
 
 export default function EntrepreneurPanel() {
+  const [activeUser, setActiveUser] = useState<PortalUser>(fallbackActiveUser);
   const [application, setApplication] = useState<Application | null>(null);
   const [startup, setStartup] = useState<Startup | null>(null);
   const [workspace, setWorkspace] = useState<EntrepreneurWorkspace | null>(null);
@@ -96,10 +99,12 @@ export default function EntrepreneurPanel() {
   const [mentorActions, setMentorActions] = useState<MentorAction[]>([]);
   const [activeMenu, setActiveMenu] = useState("Dashboard");
   const [activeEventId, setActiveEventId] = useState("");
+  const [activeTrainingId, setActiveTrainingId] = useState("");
   const [notice, setNotice] = useState("");
 
   async function syncForUser(user: PortalUser) {
     processEventReminders();
+    processLocalTrainingReminders();
     if (user.role === "Girişimci" && !user.localWorkspace) {
       try {
         const response = await fetch("/api/entrepreneur/me", { cache: "no-store" });
@@ -128,7 +133,7 @@ export default function EntrepreneurPanel() {
             EVENT: "Etkinlik",
           };
           setNotifications(
-            [...readNotificationsForUser(user.email, user.role).filter((item) => item.eventId), ...result.notifications.map((item) =>
+            [...readNotificationsForUser(user.email, user.role).filter((item) => item.eventId || item.trainingId), ...result.notifications.map((item) =>
               normalizeNotification({
                 ...item,
                 type: typeMap[String(item.type)] || "Duyuru",
@@ -167,11 +172,23 @@ export default function EntrepreneurPanel() {
   }
 
   useEffect(() => {
+    let disposed = false;
+    void fetch("/api/auth/entrepreneur", { cache: "no-store" }).then(async (response) => {
+      if (!response.ok) return;
+      const result = await response.json() as { user: PortalUser };
+      if (!disposed) setActiveUser(result.user);
+    }).catch(() => { /* Preserve the existing demo workspace when no session is available. */ });
+    return () => { disposed = true; };
+  }, []);
+
+  useEffect(() => {
     const sync = () => { void syncForUser(activeUser); };
     sync();
     const eventId = new URLSearchParams(window.location.search).get("etkinlik");
     if (eventId) { setActiveEventId(eventId); setActiveMenu("Takvim"); }
-    const reminderInterval = window.setInterval(() => processEventReminders(), 30_000);
+    const trainingId = new URLSearchParams(window.location.search).get("egitim");
+    if (trainingId) { setActiveTrainingId(trainingId); setActiveMenu("Eğitim Takvimi"); }
+    const reminderInterval = window.setInterval(() => { void syncForUser(activeUser); }, 30_000);
     const events = [
       "storage",
       "focus",
@@ -188,7 +205,7 @@ export default function EntrepreneurPanel() {
       window.clearInterval(reminderInterval);
       events.forEach((event) => window.removeEventListener(event, sync));
     };
-  }, []);
+  }, [activeUser]);
 
   const meetings = useMemo(() => readEntrepreneurMeetings(startup), [startup]);
   const profileCompletion = useMemo(() => getStartupProfileCompletion(startup), [startup]);
@@ -223,7 +240,7 @@ export default function EntrepreneurPanel() {
       (item) => item.email.toLowerCase() === activeUser.email.toLowerCase(),
     );
     if (!recipient || recipient.read) return;
-    if (activeUser.localWorkspace || notification.eventId) {
+    if (activeUser.localWorkspace || notification.eventId || notification.id.startsWith("training:")) {
       markLocalNotificationRead(notification.id, activeUser.email);
       await syncForUser(activeUser);
       return;
@@ -401,12 +418,15 @@ export default function EntrepreneurPanel() {
 
             {activeMenu === "Takvim" ? (
               <ProgramCalendar email={activeUser.email} initialEventId={activeEventId} />
+            ) : activeMenu === "Eğitim Takvimi" ? (
+              <TrainingCalendar email={activeUser.email} localWorkspace={activeUser.localWorkspace} initialTrainingId={activeTrainingId} />
             ) : activeMenu === "Bildirimler" ? (
               <NotificationInbox
                 notifications={notifications}
                 email={activeUser.email}
                 onRead={markNotificationRead}
                 onOpenEvent={(id) => { setActiveEventId(id); setActiveMenu("Takvim"); }}
+                onOpenTraining={(id) => { setActiveTrainingId(id); setActiveMenu("Eğitim Takvimi"); }}
               />
             ) : <>
 
@@ -722,7 +742,8 @@ export default function EntrepreneurPanel() {
                           key={notification.id}
                           onClick={() => {
                             void markNotificationRead(notification);
-                            if (notification.eventId) { setActiveEventId(notification.eventId); setActiveMenu("Takvim"); }
+                            if (notification.trainingId) { setActiveTrainingId(notification.trainingId); setActiveMenu("Eğitim Takvimi"); }
+                            else if (notification.eventId) { setActiveEventId(notification.eventId); setActiveMenu("Takvim"); }
                           }}
                           className={`w-full rounded-md border p-3 text-left ${notification.recipients.some((recipient) => recipient.email.toLowerCase() === activeUser.email.toLowerCase() && !recipient.read) ? "border-cyan-200 bg-cyan-50" : "border-slate-200 bg-white"}`}
                         >
@@ -730,6 +751,7 @@ export default function EntrepreneurPanel() {
                           <p className="mt-1 text-xs text-cyan-900">{notification.sentAt || notification.createdAt}</p>
                           <p className="mt-2 text-sm leading-6 text-slate-700">{notification.message}</p>
                           {notification.eventId && <p className="mt-2 text-xs font-bold text-cyan-800">Etkinliği Görüntüle →</p>}
+                          {notification.trainingId && <p className="mt-2 text-xs font-bold text-cyan-800">Eğitimi Görüntüle →</p>}
                         </button>
                       ))
                     ) : (

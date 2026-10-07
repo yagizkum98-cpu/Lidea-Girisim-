@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { EventNotificationPreferences } from "@/components/ProgramCalendar";
 import { processEventReminders } from "@/lib/events";
+import { processLocalTrainingReminders } from "@/lib/local-trainings";
 import {
   Notification,
   NotificationAudience,
@@ -47,6 +48,7 @@ export default function NotificationsPage() {
   useEffect(() => {
     const sync = async () => {
       processEventReminders();
+      processLocalTrainingReminders();
       const local = readNotifications();
       setNotifications(local);
       try {
@@ -67,7 +69,7 @@ export default function NotificationsPage() {
           FAILED: "Başarısız",
         };
         setNotifications(
-          [...readNotifications().filter((item) => item.eventId), ...result.notifications.map((item) =>
+          [...readNotifications().filter((item) => item.eventId || item.trainingId), ...result.notifications.map((item) =>
             normalizeNotification({
               ...item,
               type: typeMap[String(item.type)] || "Duyuru",
@@ -93,7 +95,7 @@ export default function NotificationsPage() {
       }
     };
     sync();
-    const interval = window.setInterval(() => processEventReminders(), 30_000);
+    const interval = window.setInterval(() => { void sync(); }, 30_000);
     window.addEventListener("focus", sync);
     window.addEventListener("storage", sync);
     window.addEventListener("lidea-notifications-updated", sync);
@@ -380,6 +382,7 @@ export default function NotificationsPage() {
                               <td className="px-5 py-4">
                                 <p className="font-black">{notification.title}</p>
                                 {notification.eventId && <Link href={`/admin/program?etkinlik=${encodeURIComponent(notification.eventId)}`} className="mt-2 inline-block text-xs font-bold text-cyan-700">Etkinliği Görüntüle →</Link>}
+                                {notification.trainingId && <Link href={`/admin/program?egitim=${encodeURIComponent(notification.trainingId)}`} className="mt-2 inline-block text-xs font-bold text-cyan-700">Eğitimi Görüntüle →</Link>}
                                 <p className="mt-1 text-xs text-slate-400">{notification.type}</p>
                               </td>
                               <td className="px-5 py-4">{notification.audience}</td>

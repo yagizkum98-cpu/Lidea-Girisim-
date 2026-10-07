@@ -26,6 +26,7 @@ export type NotificationRecipient = {
 export type Notification = {
   id: string;
   eventId?: string;
+  trainingId?: string;
   eventCategory?: "invite" | "update" | "reminder" | "registration";
   title: string;
   message: string;
@@ -138,6 +139,7 @@ export function normalizeNotification(raw: Partial<Notification> & Record<string
   return {
     id: String(raw.id || crypto.randomUUID()),
     eventId: typeof raw.eventId === "string" ? raw.eventId : undefined,
+    trainingId: typeof raw.trainingId === "string" ? raw.trainingId : undefined,
     eventCategory: raw.eventCategory as Notification["eventCategory"],
     title: String(raw.title || ""),
     message: String(raw.message || ""),

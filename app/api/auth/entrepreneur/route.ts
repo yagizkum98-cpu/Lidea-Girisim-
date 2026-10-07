@@ -1,7 +1,13 @@
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
-import { clearSessionCookie, setSessionCookie } from "@/lib/auth";
+import { clearSessionCookie, getSessionUser, setSessionCookie } from "@/lib/auth";
 import { db } from "@/lib/db";
+
+export async function GET() {
+  const user = await getSessionUser();
+  if (!user || user.role !== "ENTREPRENEUR") return NextResponse.json({ ok: false, error: "UNAUTHORIZED" }, { status: 401 });
+  return NextResponse.json({ ok: true, user: { name: user.name, email: user.email, role: "Girişimci", localWorkspace: user.id === "platform-test-entrepreneur" } });
+}
 
 export async function POST(request: Request) {
   const body = await request.json();

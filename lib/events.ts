@@ -140,12 +140,16 @@ export function eventDateKey(value: string) {
 
 function calendarTime(value: string) { return new Date(value).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, ""); }
 function escapeCalendar(value: string) { return value.replace(/\\/g, "\\\\").replace(/\r?\n/g, "\\n").replace(/;/g, "\\;").replace(/,/g, "\\,"); }
-export function eventCalendar(event: ProgramEvent, detailUrl: string) {
+export function eventCalendar(event: ProgramEvent, detailUrl: string, options: { allDay?: boolean; reminders?: number[] } = {}) {
   const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Lidea//Program Events//TR", "CALSCALE:GREGORIAN", "BEGIN:VEVENT",
-    `UID:${event.id}@lideagirisim.com`, `DTSTAMP:${calendarTime(event.updatedAt)}`, `DTSTART:${calendarTime(event.startsAt)}`, `DTEND:${calendarTime(event.endsAt)}`,
+    `UID:${event.id}@lideagirisim.com`, `DTSTAMP:${calendarTime(event.updatedAt)}`,
+    options.allDay ? `DTSTART;VALUE=DATE:${eventDateKey(event.startsAt).replace(/-/g, "")}` : `DTSTART:${calendarTime(event.startsAt)}`,
+    options.allDay ? `DTEND;VALUE=DATE:${eventDateKey(event.endsAt).replace(/-/g, "")}` : `DTEND:${calendarTime(event.endsAt)}`,
     `SUMMARY:${escapeCalendar(event.title)}`, `DESCRIPTION:${escapeCalendar(`${event.description}\n${detailUrl}`)}`,
     `LOCATION:${escapeCalendar(event.mode === "online" ? detailUrl : event.location)}`, `URL:${detailUrl}`,
-    `STATUS:${event.status === "cancelled" ? "CANCELLED" : "CONFIRMED"}`, "END:VEVENT", "END:VCALENDAR"];
+    `STATUS:${event.status === "cancelled" ? "CANCELLED" : "CONFIRMED"}`,
+    ...(options.reminders || []).flatMap((minutes) => ["BEGIN:VALARM", `TRIGGER:-PT${minutes}M`, "ACTION:DISPLAY", `DESCRIPTION:${escapeCalendar(event.title)}`, "END:VALARM"]),
+    "END:VEVENT", "END:VCALENDAR"];
   // RFC 5545 lines are folded at 75 UTF-8 octets, without splitting Turkish characters.
   const encoder = new TextEncoder();
   return lines.map((line) => {

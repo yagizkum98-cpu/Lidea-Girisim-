@@ -4,10 +4,11 @@ import { useState } from "react";
 import { Notification } from "@/lib/notifications";
 import { EventNotificationPreferences } from "@/components/ProgramCalendar";
 
-export default function NotificationInbox({ notifications, email, onRead, onOpenEvent }: {
+export default function NotificationInbox({ notifications, email, onRead, onOpenEvent, onOpenTraining }: {
   notifications: Notification[]; email: string;
   onRead: (notification: Notification) => Promise<void>;
   onOpenEvent: (id: string) => void;
+  onOpenTraining?: (id: string) => void;
 }) {
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [notice, setNotice] = useState("");
@@ -29,6 +30,7 @@ export default function NotificationInbox({ notifications, email, onRead, onOpen
         <p className="mt-1 text-xs text-slate-500">{notification.type} · {new Date(notification.sentAt || notification.createdAt).toLocaleString("tr-TR")}</p>
         <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6">{notification.message}</p>
         <div className="mt-3 flex flex-wrap gap-4">
+          {notification.trainingId && <button className="text-sm font-bold text-cyan-700" onClick={() => { void onRead(notification).catch(() => setNotice("Okundu bilgisi kaydedilemedi.")); onOpenTraining?.(notification.trainingId!); }}>Eğitimi Görüntüle →</button>}
           {notification.eventId && <button className="text-sm font-bold text-cyan-700" onClick={() => { void onRead(notification).catch(() => setNotice("Okundu bilgisi kaydedilemedi.")); onOpenEvent(notification.eventId!); }}>Etkinliği Görüntüle →</button>}
           {unread(notification) && <button className="text-sm font-semibold text-slate-500" onClick={() => { void onRead(notification).catch(() => setNotice("Okundu bilgisi kaydedilemedi.")); }}>Okundu İşaretle</button>}
         </div>
