@@ -14,6 +14,8 @@ import {
 } from "@/lib/startups";
 import { readMentors } from "@/lib/mentors";
 
+type PitchDeckSummary = { id: string; startupId: string; version: number; fileName: string; uploadedAt: string };
+
 const inputClass =
   "h-11 rounded-md border border-slate-200 bg-white px-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-cyan-600";
 
@@ -22,6 +24,8 @@ export default function StartupDetailPage() {
   const [startup, setStartup] = useState<Startup | null>(null);
   const [tab, setTab] = useState("Genel");
   const [mentors, setMentors] = useState<{ id: string; name: string; email: string; status: string; expertise: string[] }[]>([]);
+  const [pitchDecks, setPitchDecks] = useState<PitchDeckSummary[]>([]);
+  const [pitchDeckNotice, setPitchDeckNotice] = useState("");
   const [notice, setNotice] = useState("");
 
   useEffect(() => {
@@ -29,6 +33,37 @@ export default function StartupDetailPage() {
     setStartup(startups.find((item) => item.id === params.id) || null);
     setMentors(readMentors().filter((mentor) => mentor.status === "Aktif"));
   }, [params.id]);
+
+  useEffect(() => {
+    if (!startup?.applicationId) {
+      setPitchDecks([]);
+      return;
+    }
+    let disposed = false;
+    const syncPitchDecks = async () => {
+      try {
+        const response = await fetch(`/api/startups/${encodeURIComponent(startup.applicationId)}/pitch-decks`, { cache: "no-store" });
+        const result = await response.json() as { ok: boolean; startupId?: string; decks?: Omit<PitchDeckSummary, "startupId">[]; error?: string };
+        if (!response.ok || !result.ok) throw new Error(result.error || "Pitch Deck kayıtları alınamadı.");
+        if (!disposed) {
+          setPitchDecks((result.decks || []).map((deck) => ({ ...deck, startupId: result.startupId || "" })));
+          setPitchDeckNotice("");
+        }
+      } catch (error) {
+        if (!disposed) setPitchDeckNotice(error instanceof Error ? error.message : "Pitch Deck kayıtları alınamadı.");
+      }
+    };
+    void syncPitchDecks();
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") void syncPitchDecks();
+    }, 15_000);
+    window.addEventListener("focus", syncPitchDecks);
+    return () => {
+      disposed = true;
+      window.clearInterval(interval);
+      window.removeEventListener("focus", syncPitchDecks);
+    };
+  }, [startup?.applicationId]);
 
   function persist(nextStartup: Startup, message: string) {
     const updated = { ...nextStartup, updatedAt: new Date().toISOString() };
@@ -308,7 +343,8 @@ export default function StartupDetailPage() {
                     <label key={item} className="flex items-center gap-3 text-sm font-semibold">
                       <input
                         type="checkbox"
-                        checked={startup.demoDayChecklist[item]}
+                        checked={item === "Pitch Deck" ? pitchDecks.length > 0 || startup.demoDayChecklist[item] : startup.demoDayChecklist[item]}
+                        disabled={item === "Pitch Deck" && pitchDecks.length > 0}
                         onChange={(event) =>
                           persist(
                             {
@@ -327,6 +363,19 @@ export default function StartupDetailPage() {
                   ))}
                 </div>
               </div>
+              <section className="border-t border-slate-200 pt-5">
+                <h2 className="text-sm font-black">Demo Day Pitch Deck Dosyaları</h2>
+                {pitchDeckNotice ? <p role="status" className="mt-3 rounded-md bg-amber-50 p-3 text-sm text-amber-900">{pitchDeckNotice}</p> : pitchDecks.length ? (
+                  <div className="mt-3 space-y-2">
+                    {pitchDecks.map((deck) => (
+                      <a key={deck.id} href={`/api/startups/${deck.startupId}/pitch-decks/${deck.id}`} target="_blank" rel="noopener noreferrer" className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-slate-200 p-3 text-sm hover:bg-slate-50">
+                        <span className="break-all font-bold text-cyan-800">{deck.fileName}</span>
+                        <span className="text-xs text-slate-500">v{deck.version} · {new Date(deck.uploadedAt).toLocaleDateString("tr-TR")}</span>
+                      </a>
+                    ))}
+                  </div>
+                ) : <p className="mt-2 text-sm text-slate-500">Henüz girişimci Pitch Deck yüklemedi.</p>}
+              </section>
             </div>
           ) : null}
 

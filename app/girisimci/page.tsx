@@ -31,6 +31,7 @@ import { Notification as PlatformNotification, normalizeNotification, readNotifi
 import ProgramCalendar, { EventNotificationPreferences } from "@/components/ProgramCalendar";
 import { processEventReminders } from "@/lib/events";
 import NotificationInbox from "@/components/NotificationInbox";
+import EntrepreneurPitchDeck from "@/components/EntrepreneurPitchDeck";
 import TrainingCalendar from "@/components/TrainingCalendar";
 import StartupProfileEditor from "@/components/StartupProfileEditor";
 import { StartupProfilePatch } from "@/lib/validation/startup-profile";
@@ -420,6 +421,8 @@ export default function EntrepreneurPanel() {
                 onOpenEvent={(id) => { setActiveEventId(id); setActiveMenu("Takvim"); }}
                 onOpenTraining={(id) => { setActiveTrainingId(id); setActiveMenu("Eğitim Takvimi"); }}
               />
+            ) : activeMenu === "Pitch Deck" || activeMenu === "Demo Day" ? (
+              <EntrepreneurPitchDeck localWorkspace={Boolean(activeUser.localWorkspace)} hasStartup={Boolean(startup)} />
             ) : <>
 
             {!startup ? (
