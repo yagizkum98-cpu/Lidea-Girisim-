@@ -26,7 +26,7 @@ const boardMembers = [
   },
   {
     name: "Yağız Kum",
-    title: "Program Koordinatörü / Mentor",
+    title: "Mentor",
     image: "/profiles/yagiz-kum-white.png",
   },
 ];
