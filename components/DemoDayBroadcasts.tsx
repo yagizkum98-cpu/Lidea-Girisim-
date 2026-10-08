@@ -4,8 +4,22 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 
 const broadcasts = [
-  { period: "I", title: "Lidea Girişim I. Dönem DEMODAY YouTube'da!", videoUrl: "https://www.youtube.com/watch?v=sbkKHFdLet4", cover: "/demoday-first-period-youtube-cover.jpg" },
-  { period: "II", title: "Lidea Girişim II. Dönem DEMODAY YouTube'da!", videoUrl: "https://www.youtube.com/watch?v=2AYMawl6thQ", cover: "/demoday-youtube-cover.jpg" },
+  {
+    period: "I",
+    title: "Lidea Girişim I. Dönem DEMODAY YouTube'da!",
+    description: "Girişimlerin final sunumlarını ve jüri değerlendirmelerini kaydından izleyin.",
+    eventDescription: "Fethiye'de bir ilk olarak 12 Nisan 2025 tarihinde Fethiye DSİ Konferans Salonu'nda yaklaşık 150 katılımcıyla gerçekleşen Lidea Demo Day, 14 girişimin sunumuyla tamamlandı.",
+    videoUrl: "https://www.youtube.com/watch?v=sbkKHFdLet4",
+    cover: "/demoday-first-period-youtube-cover.jpg",
+  },
+  {
+    period: "II",
+    title: "Lidea Girişim II. Dönem DEMODAY YouTube'da!",
+    description: "Girişimlerin final sunumlarını ve jüri değerlendirmelerini kaydından izleyin.",
+    eventDescription: "Fethiye Kültür Merkezi'nde 9 Mayıs 2026'da ikinci kez düzenlenen Lidea Demo Day'de bu kez bölgeden gelen 15 girişimci hem stant açtı hem de sunumlarını gerçekleştirdi.",
+    videoUrl: "https://www.youtube.com/watch?v=2AYMawl6thQ",
+    cover: "/demoday-youtube-cover.jpg",
+  },
 ];
 
 export default function DemoDayBroadcasts() {
@@ -34,7 +48,8 @@ export default function DemoDayBroadcasts() {
             <div className="min-w-0">
               <p className="broadcast-eyebrow"><span aria-hidden="true" className="broadcast-youtube-icon">▶</span>YouTube&apos;da Yayında</p>
               <h2 id={`broadcast-title-${broadcast.period}`} className="broadcast-title">{broadcast.title}</h2>
-              <p className="broadcast-description">Girişimlerin final sunumlarını ve jüri değerlendirmelerini kaydından izleyin.</p>
+              <p className="broadcast-description">{broadcast.description}</p>
+              <p className="broadcast-description">{broadcast.eventDescription}</p>
               <a href={broadcast.videoUrl} target="_blank" rel="noopener noreferrer" className="broadcast-watch">
                 <span aria-hidden="true">▶</span><span>Yayını İzle</span><span aria-hidden="true" className="broadcast-arrow">↗</span>
               </a>
