@@ -1,49 +1,42 @@
-import { SignJWT, jwtVerify } from "jose";
+import { createHash } from "node:crypto";
 import { cookies } from "next/headers";
-import { AppRole } from "@/lib/permissions";
+import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
+import { canEnterPanel, createSessionToken, readSessionToken, sessionCookie, SessionUser } from "@/lib/session";
 
-// Temporary open access for admin operations while panel login is disabled.
-export async function getAdminSessionUser(): Promise<SessionUser> {
-  return {
-    id: "platform-super-admin",
-    email: process.env.ADMIN_EMAIL || "admin@lideagirisim.com",
-    name: "Super Admin",
-    role: "SUPER_ADMIN",
-  };
+export { createSessionToken } from "@/lib/session";
+export type { SessionUser } from "@/lib/session";
+
+export function credentialVersion(passwordHash: string) {
+  return createHash("sha256").update(passwordHash).digest("hex");
 }
 
-export type SessionUser = {
-  id: string;
-  email: string;
-  name: string;
-  role: AppRole;
-};
-
-const sessionCookie = "lidea-session";
-
-function authSecret() {
-  const secret = process.env.AUTH_SECRET || "development-secret-change-me";
-  return new TextEncoder().encode(secret);
-}
-
-export async function createSessionToken(user: SessionUser) {
-  return new SignJWT(user)
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime("8h")
-    .sign(authSecret());
-}
-
-export async function getSessionUser() {
-  const token = (await cookies()).get(sessionCookie)?.value;
-  if (!token) return null;
-
-  try {
-    const verified = await jwtVerify(token, authSecret());
-    return verified.payload as SessionUser;
-  } catch {
-    return null;
+export async function getSessionUser(): Promise<SessionUser | null> {
+  const user = await readSessionToken((await cookies()).get(sessionCookie)?.value);
+  if (!user) return null;
+  if (user.id === "platform-super-admin" || user.id === "platform-test-entrepreneur") {
+    const email = user.id === "platform-super-admin" ? "admin@lideagirisim.com" : "tester@lideagirisim.com";
+    return user.email === email && user.role === "SUPER_ADMIN" ? user : null;
   }
+  const stored = await db.user.findUnique({ where: { id: user.id } });
+  if (!stored?.active || stored.role !== user.role || stored.email !== user.email ||
+    user.credentialVersion !== credentialVersion(stored.passwordHash)) return null;
+  if (user.role === "ENTREPRENEUR") {
+    const accepted = await db.application.findFirst({ where: { userId: user.id, status: "ACCEPTED", startup: { is: { ownerId: user.id } } } });
+    if (!accepted) return null;
+  }
+  return { ...user, name: stored.name };
+}
+
+export async function getAdminSessionUser(): Promise<SessionUser | null> {
+  const user = await getSessionUser();
+  return user && canEnterPanel(user, "admin") ? user : null;
+}
+
+export async function requirePanelSession(panel: string) {
+  const user = await getSessionUser();
+  if (!user || !canEnterPanel(user, panel)) redirect(`/giris?next=/${panel}`);
+  return user;
 }
 
 export async function setSessionCookie(user: SessionUser) {

@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { apiError, unauthorized } from "@/lib/api";
 import { getSessionUser } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { isPreviewUser } from "@/lib/session";
 
 export async function GET() {
   try {
     const user = await getSessionUser();
-    if (!user || user.role !== "ENTREPRENEUR") return unauthorized();
+    if (!user || (user.role !== "ENTREPRENEUR" && !isPreviewUser(user))) return unauthorized();
 
-    if (user.id === "platform-test-entrepreneur") {
+    if (isPreviewUser(user)) {
       return NextResponse.json({
         ok: true,
         user: { name: user.name, email: user.email, role: "Girişimci", localWorkspace: true },
@@ -19,7 +20,7 @@ export async function GET() {
     }
 
     const application = await db.application.findFirst({
-      where: { userId: user.id },
+      where: { userId: user.id, status: "ACCEPTED", startup: { is: { ownerId: user.id } } },
       orderBy: { createdAt: "desc" },
       include: { startup: { include: { members: true, documents: true, mentorTasks: { include: { mentor: true } } } } },
     });

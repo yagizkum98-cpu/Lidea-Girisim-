@@ -7,7 +7,7 @@ const maxPitchDeckBytes = 3 * 1024 * 1024;
 
 async function getOwnedStartup(userId: string) {
   const application = await db.application.findFirst({
-    where: { userId, startup: { isNot: null } },
+    where: { userId, status: "ACCEPTED", startup: { is: { ownerId: userId } } },
     orderBy: { createdAt: "desc" },
     include: { startup: true },
   });

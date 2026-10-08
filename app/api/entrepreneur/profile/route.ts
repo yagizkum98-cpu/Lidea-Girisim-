@@ -16,7 +16,7 @@ export async function PATCH(request: Request) {
     try { raw = JSON.parse(body); } catch { return NextResponse.json({ ok: false, error: "Geçersiz veri." }, { status: 400 }); }
     const parsed = startupProfileSchema.safeParse(raw);
     if (!parsed.success) return NextResponse.json({ ok: false, error: parsed.error.issues[0].message }, { status: 400 });
-    const application = await db.application.findFirst({ where: { userId: user.id }, orderBy: { createdAt: "desc" }, include: { startup: { include: { members: true } } } });
+    const application = await db.application.findFirst({ where: { userId: user.id, status: "ACCEPTED", startup: { is: { ownerId: user.id } } }, orderBy: { createdAt: "desc" }, include: { startup: { include: { members: true } } } });
     const current = application?.startup;
     if (!current || (current.ownerId && current.ownerId !== user.id)) return NextResponse.json({ ok: false, error: "Düzenlenebilir girişim kaydı bulunamadı." }, { status: 404 });
     const { members, founder, traction, ...fields } = parsed.data;

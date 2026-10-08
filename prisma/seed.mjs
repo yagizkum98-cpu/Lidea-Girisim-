@@ -6,20 +6,20 @@ process.loadEnvFile?.();
 const prisma = new PrismaClient();
 
 const adminEmail = process.env.ADMIN_EMAIL || "admin@lideagirisim.com";
-const adminPassword = process.env.ADMIN_PASSWORD || "1234567890";
-const defaultPassword = process.env.SEED_DEFAULT_PASSWORD || adminPassword;
+const platformPasswordHash = "$2b$12$VPNgpHr5FwSV1DlVpwX5de/Fu587IJBA/yAfwlrvp0/tiz7QIpSnG";
+const defaultPassword = process.env.SEED_DEFAULT_PASSWORD;
 
 async function main() {
-  const passwordHash = await bcrypt.hash(defaultPassword, 10);
-  const adminPasswordHash = await bcrypt.hash(adminPassword, 10);
-  const testerPasswordHash = await bcrypt.hash("1234567890", 10);
+  const passwordHash = defaultPassword ? await bcrypt.hash(defaultPassword, 12) : platformPasswordHash;
+  const adminPasswordHash = platformPasswordHash;
+  const testerPasswordHash = platformPasswordHash;
 
   await prisma.user.upsert({
     where: { email: "tester@lideagirisim.com" },
     update: {
       name: "Tester",
       passwordHash: testerPasswordHash,
-      role: "ENTREPRENEUR",
+      role: "SUPER_ADMIN",
       active: true,
     },
     create: {
@@ -27,7 +27,7 @@ async function main() {
       name: "Tester",
       email: "tester@lideagirisim.com",
       passwordHash: testerPasswordHash,
-      role: "ENTREPRENEUR",
+      role: "SUPER_ADMIN",
     },
   });
 

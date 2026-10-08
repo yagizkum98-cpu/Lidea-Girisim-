@@ -13,7 +13,7 @@ export default function Header() {
             alt="Lidea Yalın Idea Girişim Programı"
             width={160}
             height={48}
-            className="h-12 w-auto"
+            className="h-10 w-auto sm:h-12"
             priority
           />
         </Link>
@@ -29,6 +29,7 @@ export default function Header() {
         </nav>
         <div className="flex items-center gap-2">
           <ThemeSwitch />
+          <Link href="/giris" className="px-3 py-2 text-sm font-bold text-cyan-950">Giriş Yap</Link>
           <ApplicationCta
             className="hidden rounded-full bg-[#063f46] px-5 py-3 text-sm font-bold text-white shadow-[0_0_24px_rgba(23,230,210,.42)] sm:inline-flex"
           />

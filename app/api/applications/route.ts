@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { listApplications } from "@/lib/services/applications-service";
 import { createApplicationSchema } from "@/lib/validation/platform";
 import bcrypt from "bcryptjs";
+import { platformEmails } from "@/lib/login";
 
 export async function GET() {
   try {
@@ -32,15 +33,21 @@ export async function POST(req: Request) {
     }
 
     const { password, ...applicationData } = parsed.data;
+    if (platformEmails.includes(applicationData.email.trim().toLowerCase())) {
+      return NextResponse.json({ ok: false, error: "EMAIL_ALREADY_IN_USE" }, { status: 409 });
+    }
     const passwordHash = await bcrypt.hash(password, 10);
     const existingUser = await db.user.findUnique({ where: { email: applicationData.email.toLowerCase() } });
     if (existingUser && existingUser.role !== "ENTREPRENEUR") {
       return NextResponse.json({ ok: false, error: "EMAIL_ALREADY_IN_USE" }, { status: 409 });
     }
+    if (existingUser && !(await bcrypt.compare(password, existingUser.passwordHash))) {
+      return NextResponse.json({ ok: false, error: "EMAIL_ALREADY_IN_USE" }, { status: 409 });
+    }
     const application = await db.$transaction(async (tx) => {
       const entrepreneur = await tx.user.upsert({
         where: { email: applicationData.email.toLowerCase() },
-        update: { name: applicationData.founder, passwordHash, active: true },
+        update: {},
         create: {
           name: applicationData.founder,
           email: applicationData.email.toLowerCase(),
