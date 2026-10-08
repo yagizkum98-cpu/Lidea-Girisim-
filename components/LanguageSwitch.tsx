@@ -24,7 +24,7 @@ const dictionary: Record<string, string> = {
   "DÖNEM": "COHORT",
   "Tarih": "Date",
   "Tarih belirlenecek": "Date to be announced",
-  "Yönetim Kurulu": "Board",
+  "Mentorlar": "Mentors",
   "Eğitim Takvimi": "Training Calendar",
   "YouTube'da Yayında": "Now on YouTube",
   "Lidea Girişim I. Dönem DEMODAY YouTube'da!": "Lidea Entrepreneurship Cohort I DEMO DAY on YouTube!",

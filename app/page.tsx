@@ -241,7 +241,7 @@ export default function Home() {
         <div className="mt-12">
           <div className="inline-flex rounded-full border border-cyan-700/20 bg-white/35 p-1 shadow-[0_0_28px_rgba(23,230,210,.22)]">
             <button className="rounded-full bg-[#063f46] px-6 py-3 text-sm font-bold text-white shadow-[0_0_22px_rgba(23,230,210,.38)]">
-              Yönetim Kurulu
+              Mentorlar
             </button>
           </div>
 
