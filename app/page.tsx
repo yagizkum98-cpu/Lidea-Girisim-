@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import type { CSSProperties } from "react";
 import ApplicationCta from "@/components/ApplicationCta";
 import Header from "@/components/Header";
 import LideaCheckPublicAnnouncements from "@/components/LideaCheckPublicAnnouncements";
@@ -27,18 +26,61 @@ const boardMembers = [
   },
 ];
 
-const secondPeriodPhotos = [
-  { src: "/lidea-2-donem/01.jpg", title: "Lidea Girişim Programı ile Fethiye'de fikriniz uçuşa geçsin" },
-  { src: "/lidea-2-donem/02.jpg", title: "Kuluçka programı şehirleri" },
-  { src: "/lidea-2-donem/03.jpg", title: "Kuluçka programına geçen girişimler" },
-  { src: "/lidea-2-donem/04.jpg", title: "Demo Day sunumları" },
-  { src: "/lidea-2-donem/05.jpg", title: "Kuluçka programına seçilen girişimler" },
-  { src: "/lidea-2-donem/06.jpg", title: "Demo Day birincilik ödülü" },
-  { src: "/lidea-2-donem/07.jpg", title: "Demo Day ikincilik ödülü" },
-  { src: "/lidea-2-donem/08.jpg", title: "LİDER özel ödülü" },
-  { src: "/lidea-2-donem/09.jpg", title: "Lidea 2. dönem aile fotoğrafı" },
-  { src: "/lidea-2-donem/10.jpg", title: "WEFIGAMES özel ödülü" },
-  { src: "/lidea-2-donem/11.jpg", title: "2. dönem kapanış seçkisi" },
+const archivePosts = [
+  {
+    shortcode: "Db8oCX7IJDE",
+    image: "/lidea-2-donem/Db8oCX7IJDE.webp",
+    title: "Demo Day sunumları yayında",
+    description: "İkinci dönem girişimlerinin sunumları Lidea YouTube kanalında.",
+    date: "2026-08-12",
+    dateLabel: "12 Ağustos 2026",
+    video: false,
+  },
+  {
+    shortcode: "Db2p0pEIX6f",
+    image: "/lidea-2-donem/Db2p0pEIX6f.jpg",
+    title: "Demo Day'den kalan anlar",
+    description: "Sahnedeki fikirler, yeni bağlantılar ve ikinci dönemden bir video seçkisi.",
+    date: "2026-08-10",
+    dateLabel: "10 Ağustos 2026",
+    video: true,
+  },
+  {
+    shortcode: "DYWs89MIaFN",
+    image: "/lidea-2-donem/DYWs89MIaFN.jpg",
+    title: "İkinci dönem açılış videosu",
+    description: "2026 Lidea Girişim Programı ikinci dönem açılış filmi.",
+    date: "2026-05-15",
+    dateLabel: "15 Mayıs 2026",
+    video: true,
+  },
+  {
+    shortcode: "DYNmYiVo3sD",
+    image: "/lidea-2-donem/DYNmYiVo3sD.jpg",
+    title: "Birincilik ödülü: CHITOLASTIC",
+    description: "İkinci dönem Demo Day birincisi CHITOLASTIC'in ödül anı.",
+    date: "2026-05-11",
+    dateLabel: "11 Mayıs 2026",
+    video: false,
+  },
+  {
+    shortcode: "DYNmEb5o1AH",
+    image: "/lidea-2-donem/DYNmEb5o1AH.jpg",
+    title: "İkincilik ödülü: BEATAIR",
+    description: "Müzik listelerini katılımcı oylamasına açan BEATAIR'in başarısı.",
+    date: "2026-05-11",
+    dateLabel: "11 Mayıs 2026",
+    video: false,
+  },
+  {
+    shortcode: "DYNlqT5oRPZ",
+    image: "/lidea-2-donem/DYNlqT5oRPZ.jpg",
+    title: "Üçüncülük ödülü: FİKAMATE",
+    description: "Kahve ikramı etrafında buluşmayı hedefleyen FİKAMATE'in ödül anı.",
+    date: "2026-05-11",
+    dateLabel: "11 Mayıs 2026",
+    video: false,
+  },
 ];
 
 const benefits = [
@@ -49,14 +91,14 @@ const benefits = [
 ];
 
 const ecosystemPartners = [
-  { name: "Hipokampüs", logo: "/hipokampus-logo-512.png", logoClassName: "h-28 w-28" },
   { name: "LİİDER", logo: "/liider-logo.png", logoClassName: "h-20 w-full max-w-52" },
   { name: "GamFed", logo: "/gamfed-logo.png", logoClassName: "h-20 w-full max-w-52" },
   { name: "Fethiye Ticaret ve Sanayi Odası", logo: "/ftso-logo.png", logoClassName: "h-28 w-28" },
-  { name: "T.C. Ticaret Bakanlığı", logo: "/ticaret-bakanligi-logo-requested.png", logoClassName: "h-28 w-28" },
   { name: "GEKA", logo: "/geka-logo.png", logoClassName: "h-20 w-full max-w-52" },
+  { name: "T.C. Sanayi ve Teknoloji Bakanlığı", logo: "/ticaret-bakanligi-logo-requested.png", logoClassName: "h-28 w-28" },
   { name: "Fethiye Belediyesi", logo: "/fethiye-belediyesi-logo.png", logoClassName: "h-28 w-32" },
   { name: "Muğla Teknopark", logo: "/mugla-teknopark-logo.png", logoClassName: "h-20 w-full max-w-52" },
+  { name: "Hipokampüs", logo: "/hipokampus-logo-512.png", logoClassName: "h-28 w-28" },
 ];
 
 const pressCards = [
@@ -173,76 +215,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-16">
-        <article
-          className="lidea-period-card overflow-hidden rounded-[1.75rem] border border-cyan-500/25 bg-[#041419] text-white shadow-[0_28px_90px_rgba(0,86,102,.28),0_0_42px_rgba(23,230,210,.24)]"
-          style={{ "--slide-count": secondPeriodPhotos.length } as CSSProperties}
-        >
-          <div className="grid gap-0 lg:grid-cols-[.72fr_1.28fr]">
-            <div className="relative flex min-h-[430px] flex-col justify-between overflow-hidden p-7 sm:p-9">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(23,230,210,.22),transparent_34%),radial-gradient(circle_at_84%_78%,rgba(138,214,111,.18),transparent_36%)]" />
-              <div className="absolute inset-y-0 right-0 w-px bg-white/10" />
-              <div className="relative">
-                <p className="text-sm font-black uppercase tracking-[.18em] text-[#17e6d2]">Arşiv</p>
-                <h2 className="mt-4 text-4xl font-black leading-tight md:text-5xl">
-                  2. Dönem Lidea Girişim Programı
-                </h2>
-                <p className="mt-5 max-w-md text-sm leading-7 text-white/68">
-                  Başvurudan Demo Day ödüllerine uzanan ikinci dönem yolculuğu.
-                </p>
-              </div>
-
-              <div className="relative mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {secondPeriodPhotos.map((photo, index) => (
-                  <div
-                    className="lidea-period-number rounded-md border border-white/12 bg-white/8 px-3 py-2"
-                    key={photo.src}
-                    style={
-                      {
-                        "--slide-index": index,
-                        "--slide-duration": "4s",
-                      } as CSSProperties
-                    }
-                  >
-                    <span className="block text-lg font-black tabular-nums">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <span className="mt-1 block truncate text-[11px] font-bold text-white/54">
-                      {photo.title}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="relative min-h-[520px] bg-black/55 p-4 sm:p-6">
-              <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(23,230,210,.16),transparent_28%,rgba(138,214,111,.12)_78%,transparent)]" />
-              <div className="relative h-full min-h-[488px] overflow-hidden rounded-lg border border-white/10 bg-[#020607]">
-                {secondPeriodPhotos.map((photo, index) => (
-                  <figure
-                    className="lidea-period-slide absolute inset-0 bg-contain bg-center bg-no-repeat"
-                    key={photo.src}
-                    style={
-                      {
-                        "--slide-index": index,
-                        "--slide-duration": "4s",
-                        backgroundImage: `linear-gradient(135deg, rgba(23, 230, 210, .18), rgba(5, 47, 54, .12)), url('${photo.src}')`,
-                      } as CSSProperties
-                    }
-                  >
-                    <figcaption className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 bg-gradient-to-t from-black/82 via-black/45 to-transparent px-5 pb-5 pt-20">
-                      <span className="text-sm font-bold text-white/82">{photo.title}</span>
-                      <span className="rounded-full border border-white/20 bg-white/12 px-3 py-1 text-sm font-black tabular-nums text-white">
-                        {String(index + 1).padStart(2, "0")} / {String(secondPeriodPhotos.length).padStart(2, "0")}
-                      </span>
-                    </figcaption>
-                  </figure>
-                ))}
-              </div>
-            </div>
-          </div>
-        </article>
-      </section>
+      <PublicTrainingSchedule />
 
       <DemoDayBroadcasts />
 
@@ -402,7 +375,65 @@ export default function Home() {
         </div>
       </section>
 
-      <PublicTrainingSchedule />
+      <section id="arsiv" className="border-y border-cyan-700/15 bg-white/60">
+        <div className="mx-auto max-w-7xl px-6 py-16">
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <p className="font-bold text-[#0b7f5a]">ARŞİV</p>
+              <h2 className="mt-3 text-3xl font-black sm:text-4xl">2. Dönem Lidea Girişim Programı</h2>
+              <p className="mt-4 max-w-2xl leading-7 text-[#052f36]/75">
+                Demo Day'den ödül anlarına, ikinci dönemin Instagram seçkisi.
+              </p>
+            </div>
+            <a
+              href="https://www.instagram.com/lideagirisim/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-[#0b7f5a] underline underline-offset-4 transition-colors hover:text-[#052f36]"
+            >
+              @lideagirisim · Instagram'da görüntüle
+            </a>
+          </div>
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {archivePosts.map((post) => (
+              <a
+                key={post.shortcode}
+                href={`https://www.instagram.com/${post.video ? "reel" : "p"}/${post.shortcode}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group overflow-hidden rounded-lg border border-cyan-700/15 bg-white transition-shadow hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0b7f5a]"
+              >
+                <div className="relative aspect-[4/5] bg-[#020607]">
+                  <Image
+                    src={post.image}
+                    alt={post.title}
+                    fill
+                    sizes="(max-width: 639px) calc(100vw - 48px), (max-width: 1023px) 50vw, 33vw"
+                    className="object-contain"
+                  />
+                  {post.video && (
+                    <span className="absolute left-3 top-3 rounded bg-black/75 px-3 py-1 text-xs font-bold text-white">
+                      Video
+                    </span>
+                  )}
+                </div>
+                <div className="p-5">
+                  <time dateTime={post.date} className="text-xs font-bold text-[#052f36]/60">
+                    {post.dateLabel}
+                  </time>
+                  <h3 className="mt-2 text-lg font-black text-[#052f36] group-hover:text-[#0b7f5a]">
+                    {post.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-[#052f36]/75">{post.description}</p>
+                  <span className="mt-4 inline-block text-sm font-bold text-[#0b7f5a]">
+                    {post.video ? "Instagram'da izle" : "Gönderiyi görüntüle"}
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section id="surec" className="bg-[#052f36] text-white shadow-[0_0_70px_rgba(0,166,200,.25)_inset]">
         <div className="mx-auto max-w-7xl px-6 py-24">
