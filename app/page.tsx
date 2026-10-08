@@ -24,6 +24,11 @@ const boardMembers = [
     title: "Gamfed Kurucusu / Oyunlaştırma Uzmanı",
     image: "/profiles/ercan-altug-yilmaz.png",
   },
+  {
+    name: "Yağız Kum",
+    title: "Program Koordinatörü / Mentor",
+    image: "/profiles/yagiz-kum.jpg",
+  },
 ];
 
 const archivePosts = [
@@ -245,7 +250,7 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {boardMembers.map((member) => (
               <article className="card p-6 text-center" key={member.name}>
                 <div className="relative mx-auto flex aspect-square w-full max-w-[220px] items-center justify-center overflow-hidden rounded-3xl border border-cyan-600/25 bg-gradient-to-br from-white/60 via-[#d8fbff]/60 to-[#eafff8]/60 shadow-[0_0_28px_rgba(23,230,210,.24)]">
